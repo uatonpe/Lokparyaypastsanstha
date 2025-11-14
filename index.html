@@ -40,12 +40,11 @@
     </style>
 </head>
 <body>
-
     <div class="container">
         <h1>🏦 पतसंस्था ग्राउंड सर्व्हे फॉर्म</h1>
         <form id="survey-form">
-
-            <div class="form-group">
+            <!-- Form fields from previous code -->
+             <div class="form-group">
                 <label for="surveyNumber">1. सर्वे क्रमांक:</label>
                 <input type="text" id="surveyNumber" name="surveyNumber" required>
             </div>
@@ -183,33 +182,50 @@
     </div>
 
 <script>
+    // ▼▼▼▼▼ तुमची माहिती इथे भरा ▼▼▼▼▼
+    const API_KEY = 'AIzaSyADpmUttHbznSowws1nk19BmJ7TjktsApU'; // तुमचा API Key
+    const SHEET_ID = '1NL2-dDBUIZ7D-hbjlo_cBDiJDRyUC0xPczGmnINbK1s'; // तुमच्या शीटचा आयडी
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz3IpbNNO4UO27j_vQ-vh8NdXB_G1IPECCk8T42HCTkYasMrECbUezUzi0bWE4RRZBE/exec'; // Apps Script ची नवीन URL
+    const MASTER_SHEET_NAME = 'StaffMaster'; // तुमच्या मास्टर शीटचे नाव (यात Taluka, Village आहेत)
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
     const form = document.getElementById('survey-form');
     const submitButton = document.getElementById('submit-button');
     const statusMessage = document.getElementById('status-message');
     const talukaSelect = document.getElementById('taluka');
     const villageSelect = document.getElementById('village');
-    
-    // !!! महत्वाची सूचना: येथे तुमची Web App URL पेस्ट करा !!!
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby6QFlKiMPKafUeSkl4R3YEB2mCT2oKcalbxEa0wVsgw7gAcpJpISrhCgz_Q-8bW_a1/exec'; // तुमची URL इथे टाका
 
     let talukaVillageData = {};
 
-    // 1. पेज लोड झाल्यावर MasterData शीटमधून डेटा आणा
-    document.addEventListener('DOMContentLoaded', () => {
-        fetch(WEB_APP_URL) // GET request automatically goes to doGet
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                talukaVillageData = data;
+    // 1. Google Sheets API वापरून तालुका-गावांची यादी लोड करा
+    async function loadMasterData() {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${MASTER_SHEET_NAME}!A2:B?key=${API_KEY}`;
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            const rows = data.values;
+
+            if (rows && rows.length > 0) {
+                // डेटाला आपल्या गरजेनुसार रूपांतरित करा { "तालुका": ["गाव१", "गाव२"] }
+                rows.forEach(row => {
+                    const taluka = row[0];
+                    const village = row[1];
+                    if (taluka && village) {
+                        if (!talukaVillageData[taluka]) {
+                            talukaVillageData[taluka] = [];
+                        }
+                        talukaVillageData[taluka].push(village);
+                    }
+                });
                 populateTalukas();
-            })
-            .catch(error => {
-                talukaSelect.innerHTML = `<option value="">डेटा लोड करण्यात त्रुटी!</option>`;
-                console.error('Error fetching master data:', error);
-            });
-    });
+            } else {
+                talukaSelect.innerHTML = '<option value="">मास्टर डेटा सापडला नाही</option>';
+            }
+        } catch (error) {
+            console.error("Error loading master data:", error);
+            talukaSelect.innerHTML = '<option value="">डेटा लोड करताना त्रुटी!</option>';
+        }
+    }
 
     // 2. तालुका ड्रॉपडाउन भरा
     function populateTalukas() {
@@ -228,10 +244,8 @@
         const selectedTaluka = talukaSelect.value;
         villageSelect.innerHTML = '<option value="">गाव निवडा</option>';
         villageSelect.disabled = true;
-
         if (selectedTaluka && talukaVillageData[selectedTaluka]) {
-            const villages = talukaVillageData[selectedTaluka];
-            villages.sort().forEach(village => {
+            talukaVillageData[selectedTaluka].sort().forEach(village => {
                 const option = document.createElement('option');
                 option.value = village;
                 option.textContent = village;
@@ -241,7 +255,7 @@
         }
     });
 
-    // 4. फॉर्म सबमिट करण्याची प्रक्रिया (POST request)
+    // 4. फॉर्म सबमिशन प्रक्रिया (Apps Script Web App वापरून)
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         
@@ -256,17 +270,12 @@
             if (!data[key]) {
                 data[key] = value;
             } else {
-                if (!Array.isArray(data[key])) {
-                    data[key] = [data[key]];
-                }
+                if (!Array.isArray(data[key])) { data[key] = [data[key]]; }
                 data[key].push(value);
             }
         });
-        
         Object.keys(data).forEach(key => {
-            if (Array.isArray(data[key])) {
-                data[key] = data[key].join(', ');
-            }
+            if (Array.isArray(data[key])) { data[key] = data[key].join(', '); }
         });
         
         const finalFormData = new FormData();
@@ -284,6 +293,7 @@
                 statusMessage.textContent = 'तुमचा फॉर्म यशस्वीरित्या जमा झाला आहे!';
                 statusMessage.className = 'success';
                 form.reset();
+                document.getElementById('surveyDate').valueAsDate = new Date();
                 villageSelect.innerHTML = '<option value="">प्रथम तालुका निवडा</option>';
                 villageSelect.disabled = true;
             } else {
@@ -302,8 +312,11 @@
         });
     });
 
-    // आजची तारीख आपोआप सेट करण्यासाठी
-    document.getElementById('surveyDate').valueAsDate = new Date();
+    // पेज लोड झाल्यावर मास्टर डेटा लोड करा
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('surveyDate').valueAsDate = new Date();
+        loadMasterData();
+    });
 </script>
 
 </body>
