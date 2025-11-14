@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>पतसंस्था ग्राउंड सर्व्हे फॉर्म</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+        :root {
+            --primary-color: #007bff;
+            --background-color: #f4f7f6;
+            --form-bg-color: #ffffff;
+            --text-color: #333;
+            --label-color: #555;
+            --border-color: #ddd;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--background-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .container { background-color: var(--form-bg-color); padding: 2rem; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); width: 100%; max-width: 700px; }
+        h1 { color: var(--primary-color); text-align: center; margin-bottom: 1.5rem; font-size: 1.8rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        label { display: block; margin-bottom: 0.5rem; color: var(--label-color); font-weight: 500; }
+        input[type="text"], input[type="number"], input[type="date"], input[type="tel"], select, textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 5px; font-size: 1rem; transition: border-color 0.3s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); }
+        select:disabled { background-color: #e9ecef; cursor: not-allowed; }
+        .radio-group, .checkbox-group { display: flex; flex-wrap: wrap; gap: 1rem; }
+        .radio-group label, .checkbox-group label { display: flex; align-items: center; gap: 0.5rem; font-weight: 400; }
+        input[type="radio"], input[type="checkbox"] { margin-right: 5px; }
+        .inline-group { display: flex; gap: 1rem; }
+        .inline-group .form-group { flex: 1; }
+        button[type="submit"] { width: 100%; padding: 15px; background-color: var(--primary-color); color: white; border: none; border-radius: 5px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: background-color 0.3s, transform 0.1s; }
+        button[type="submit"]:hover { background-color: #0056b3; }
+        button[type="submit"]:disabled { background-color: #aaa; cursor: not-allowed; }
+        .section-title { font-size: 1.3rem; color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 5px; margin-top: 2rem; margin-bottom: 1.5rem; }
+        #status-message { text-align: center; margin-top: 1rem; font-weight: 500; padding: 10px; border-radius: 5px; display: none; }
+        .success { background-color: #d4edda; color: var(--success-color); border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: var(--error-color); border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🏦 पतसंस्था ग्राउंड सर्व्हे फॉर्म</h1>
+        <form id="survey-form">
+
+            <div class="form-group">
+                <label for="surveyNumber">1. सर्वे क्रमांक:</label>
+                <input type="text" id="surveyNumber" name="surveyNumber" required>
+            </div>
+            <div class="form-group">
+                <label for="surveyDate">2. दिनांक:</label>
+                <input type="date" id="surveyDate" name="surveyDate" required>
+            </div>
+            <div class="form-group">
+                <label for="surveyorName">3. सर्वे करणाऱ्याचे नाव:</label>
+                <input type="text" id="surveyorName" name="surveyorName" required>
+            </div>
+
+            <h2 class="section-title">🧍 व्यक्तीची माहिती</h2>
+
+            <div class="form-group">
+                <label for="personName">1. नाव:</label>
+                <input type="text" id="personName" name="personName" required>
+            </div>
+             <div class="inline-group">
+                <div class="form-group">
+                    <label for="taluka">तालुका:</label>
+                    <select id="taluka" name="taluka" required>
+                        <option value="">तालुका लोड होत आहे...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="village">2. गाव / परिसर:</label>
+                     <select id="village" name="village" required disabled>
+                        <option value="">प्रथम तालुका निवडा</option>
+                    </select>
+                </div>
+            </div>
+            <div class="inline-group">
+                <div class="form-group">
+                    <label for="age">3. वय:</label>
+                    <input type="number" id="age" name="age" required>
+                </div>
+                <div class="form-group">
+                    <label>लिंग:</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="gender" value="पुरुष" required> पुरुष</label>
+                        <label><input type="radio" name="gender" value="महिला"> महिला</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="mobileNumber">4. मोबाईल क्रमांक:</label>
+                <input type="tel" id="mobileNumber" name="mobileNumber" pattern="[0-9]{10}" required>
+            </div>
+            <div class="form-group">
+                <label for="occupation">5. व्यवसाय:</label>
+                <input type="text" id="occupation" name="occupation" required>
+            </div>
+            <div class="form-group">
+                <label for="monthlyIncome">6. मासिक उत्पन्न (अंदाजे): ₹</label>
+                <input type="number" id="monthlyIncome" name="monthlyIncome" placeholder="उदा. 10000" required>
+            </div>
+
+            <h2 class="section-title">💰 आर्थिक सवयी व बचत</h2>
+            
+            <div class="form-group">
+                <label>7. सध्या तुम्ही कोणत्या ठिकाणी बचत करता?</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" name="savingMethods" value="बँक"> बँक</label>
+                    <label><input type="checkbox" name="savingMethods" value="पतसंस्था"> पतसंस्था</label>
+                    <label><input type="checkbox" name="savingMethods" value="घरातच ठेवतो"> घरातच ठेवतो</label>
+                    <label><input type="checkbox" name="savingMethods" value="इतर"> इतर</label>
+                </div>
+            </div>
+             <div class="form-group">
+                <label>8. तुम्हाला कोणत्या सेवा घ्यायला आवडतील?</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" name="interestedServices" value="पिग्मी"> पिग्मी (दैनिक बचत)</label>
+                    <label><input type="checkbox" name="interestedServices" value="बचत खाते"> नियमित बचत खाते</label>
+                    <label><input type="checkbox" name="interestedServices" value="आर.डी."> आर.डी. (मासिक ठेव)</label>
+                    <label><input type="checkbox" name="interestedServices" value="एफ.डी."> एफ.डी. (मुदत ठेव)</label>
+                    <label><input type="checkbox" name="interestedServices" value="कर्ज"> कर्ज सुविधा</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>9. तुम्ही किती रक्कम बचत करू शकता?</label>
+                <div class="inline-group">
+                    <input type="number" name="savingAmount" placeholder="₹ रक्कम" required>
+                    <div class="radio-group" style="align-items:center;">
+                        <label><input type="radio" name="savingFrequency" value="प्रति दिवस" required> प्रति दिवस</label>
+                        <label><input type="radio" name="savingFrequency" value="प्रति महिना"> प्रति महिना</label>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-title">🌐 डिजिटल व्यवहार सवय</h2>
+            <div class="form-group">
+                <label>10. तुमच्याकडे स्मार्टफोन आहे का?</label>
+                 <div class="radio-group">
+                    <label><input type="radio" name="hasSmartphone" value="होय" required> होय</label>
+                    <label><input type="radio" name="hasSmartphone" value="नाही"> नाही</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>11. तुम्ही Google Pay / PhonePe / UPI वापरता का?</label>
+                 <div class="radio-group">
+                    <label><input type="radio" name="usesUpi" value="होय" required> होय</label>
+                    <label><input type="radio" name="usesUpi" value="नाही"> नाही</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>12. तुम्हाला ऑनलाइन पैसे जमा करणे सोपे वाटते का?</label>
+                 <div class="radio-group">
+                    <label><input type="radio" name="onlinePaymentComfort" value="होय" required> होय</label>
+                    <label><input type="radio" name="onlinePaymentComfort" value="नाही"> नाही</label>
+                    <label><input type="radio" name="onlinePaymentComfort" value="मार्गदर्शन हवे आहे"> मार्गदर्शन हवे आहे</label>
+                </div>
+            </div>
+
+            <h2 class="section-title">🏡 इतर माहिती</h2>
+            <div class="form-group">
+                <label for="earningMembers">13. तुमच्या घरात एकूण किती कमावते सदस्य आहेत?</label>
+                <input type="number" id="earningMembers" name="earningMembers" required>
+            </div>
+            <div class="form-group">
+                <label>14. घरात इतर कोणाला पतसंस्थेच्या सेवांमध्ये रस आहे का?</label>
+                 <div class="radio-group">
+                    <label><input type="radio" name="othersInterested" value="होय" required> होय</label>
+                    <label><input type="radio" name="othersInterested" value="नाही"> नाही</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="suggestions">15. सूचना / अपेक्षा (असल्यास):</label>
+                <textarea id="suggestions" name="suggestions" rows="4"></textarea>
+            </div>
+            
+            <button type="submit" id="submit-button">फॉर्म जमा करा</button>
+            <div id="status-message"></div>
+        </form>
+    </div>
+
+<script>
+    const form = document.getElementById('survey-form');
+    const submitButton = document.getElementById('submit-button');
+    const statusMessage = document.getElementById('status-message');
+    const talukaSelect = document.getElementById('taluka');
+    const villageSelect = document.getElementById('village');
+    
+    // !!! महत्वाची सूचना: येथे तुमची Web App URL पेस्ट करा !!!
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby6QFlKiMPKafUeSkl4R3YEB2mCT2oKcalbxEa0wVsgw7gAcpJpISrhCgz_Q-8bW_a1/exec'; // तुमची URL इथे टाका
+
+    let talukaVillageData = {};
+
+    // 1. पेज लोड झाल्यावर MasterData शीटमधून डेटा आणा
+    document.addEventListener('DOMContentLoaded', () => {
+        fetch(WEB_APP_URL) // GET request automatically goes to doGet
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                talukaVillageData = data;
+                populateTalukas();
+            })
+            .catch(error => {
+                talukaSelect.innerHTML = `<option value="">डेटा लोड करण्यात त्रुटी!</option>`;
+                console.error('Error fetching master data:', error);
+            });
+    });
+
+    // 2. तालुका ड्रॉपडाउन भरा
+    function populateTalukas() {
+        const talukas = Object.keys(talukaVillageData);
+        talukaSelect.innerHTML = '<option value="">तालुका निवडा</option>';
+        talukas.sort().forEach(taluka => {
+            const option = document.createElement('option');
+            option.value = taluka;
+            option.textContent = taluka;
+            talukaSelect.appendChild(option);
+        });
+    }
+
+    // 3. तालुका निवडल्यावर गावांची यादी बदला
+    talukaSelect.addEventListener('change', () => {
+        const selectedTaluka = talukaSelect.value;
+        villageSelect.innerHTML = '<option value="">गाव निवडा</option>';
+        villageSelect.disabled = true;
+
+        if (selectedTaluka && talukaVillageData[selectedTaluka]) {
+            const villages = talukaVillageData[selectedTaluka];
+            villages.sort().forEach(village => {
+                const option = document.createElement('option');
+                option.value = village;
+                option.textContent = village;
+                villageSelect.appendChild(option);
+            });
+            villageSelect.disabled = false;
+        }
+    });
+
+    // 4. फॉर्म सबमिट करण्याची प्रक्रिया (POST request)
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        submitButton.disabled = true;
+        submitButton.textContent = 'जमा होत आहे...';
+        statusMessage.style.display = 'none';
+
+        const formData = new FormData(form);
+        const data = {};
+
+        formData.forEach((value, key) => {
+            if (!data[key]) {
+                data[key] = value;
+            } else {
+                if (!Array.isArray(data[key])) {
+                    data[key] = [data[key]];
+                }
+                data[key].push(value);
+            }
+        });
+        
+        Object.keys(data).forEach(key => {
+            if (Array.isArray(data[key])) {
+                data[key] = data[key].join(', ');
+            }
+        });
+        
+        const finalFormData = new FormData();
+        for(const key in data){
+            finalFormData.append(key, data[key]);
+        }
+
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: finalFormData
+        })
+        .then(response => response.json())
+        .then(result => {
+            if(result.result === 'success'){
+                statusMessage.textContent = 'तुमचा फॉर्म यशस्वीरित्या जमा झाला आहे!';
+                statusMessage.className = 'success';
+                form.reset();
+                villageSelect.innerHTML = '<option value="">प्रथम तालुका निवडा</option>';
+                villageSelect.disabled = true;
+            } else {
+                throw new Error(result.error || 'अज्ञात त्रुटी आली.');
+            }
+        })
+        .catch(error => {
+            statusMessage.textContent = `फॉर्म जमा करताना त्रुटी आली: ${error.message}`;
+            statusMessage.className = 'error';
+        })
+        .finally(() => {
+            statusMessage.style.display = 'block';
+            submitButton.disabled = false;
+            submitButton.textContent = 'फॉर्म जमा करा';
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+    });
+
+    // आजची तारीख आपोआप सेट करण्यासाठी
+    document.getElementById('surveyDate').valueAsDate = new Date();
+</script>
+
+</body>
+</html>
