@@ -5,45 +5,308 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>पतसंस्था ग्राउंड सर्व्हे फॉर्म</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        
         :root {
-            --primary-color: #007bff;
-            --background-color: #f4f7f6;
+            --primary-color: #0056b3;
+            --primary-color-dark: #004494;
+            --secondary-color: #007bff;
+            --background-color: #f0f2f5;
             --form-bg-color: #ffffff;
             --text-color: #333;
             --label-color: #555;
-            --border-color: #ddd;
-            --success-color: #28a745;
-            --error-color: #dc3545;
+            --border-color: #ced4da;
+            --border-focus-color: #80bdff;
+            --success-color: #155724;
+            --success-bg-color: #d4edda;
+            --error-color: #721c24;
+            --error-bg-color: #f8d7da;
+            --shadow-color: rgba(0, 0, 0, 0.1);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Poppins', sans-serif; background-color: var(--background-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .container { background-color: var(--form-bg-color); padding: 2rem; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); width: 100%; max-width: 700px; }
-        h1 { color: var(--primary-color); text-align: center; margin-bottom: 1.5rem; font-size: 1.8rem; }
-        .form-group { margin-bottom: 1.2rem; }
-        label { display: block; margin-bottom: 0.5rem; color: var(--label-color); font-weight: 500; }
-        input[type="text"], input[type="number"], input[type="date"], input[type="tel"], select, textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 5px; font-size: 1rem; transition: border-color 0.3s; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-color); }
-        select:disabled { background-color: #e9ecef; cursor: not-allowed; }
-        .radio-group, .checkbox-group { display: flex; flex-wrap: wrap; gap: 1rem; }
-        .radio-group label, .checkbox-group label { display: flex; align-items: center; gap: 0.5rem; font-weight: 400; }
-        input[type="radio"], input[type="checkbox"] { margin-right: 5px; }
-        .inline-group { display: flex; gap: 1rem; }
-        .inline-group .form-group { flex: 1; }
-        button[type="submit"] { width: 100%; padding: 15px; background-color: var(--primary-color); color: white; border: none; border-radius: 5px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: background-color 0.3s, transform 0.1s; }
-        button[type="submit"]:hover { background-color: #0056b3; }
-        button[type="submit"]:disabled { background-color: #aaa; cursor: not-allowed; }
-        .section-title { font-size: 1.3rem; color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 5px; margin-top: 2rem; margin-bottom: 1.5rem; }
-        #status-message { text-align: center; margin-top: 1rem; font-weight: 500; padding: 10px; border-radius: 5px; display: none; }
-        .success { background-color: #d4edda; color: var(--success-color); border: 1px solid #c3e6cb; }
-        .error { background-color: #f8d7da; color: var(--error-color); border: 1px solid #f5c6cb; }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: var(--background-color); 
+            color: var(--text-color); 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; /* Align to top to see shadow */
+            min-height: 100vh; 
+            padding: 30px 15px;
+        }
+
+        .container { 
+            background-color: var(--form-bg-color); 
+            padding: 2rem 2.5rem; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 30px var(--shadow-color); 
+            width: 100%; 
+            max-width: 750px;
+            border-top: 5px solid var(--primary-color);
+        }
+
+        h1 { 
+            color: var(--primary-color); 
+            text-align: center; 
+            margin-bottom: 2rem; 
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary-color-dark);
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 80px;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        .form-group { 
+            margin-bottom: 1.5rem; 
+        }
+
+        label { 
+            display: block; 
+            margin-bottom: 0.6rem; 
+            color: var(--label-color); 
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"], 
+        input[type="number"], 
+        input[type="date"], 
+        input[type="tel"], 
+        select, 
+        textarea { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            font-size: 1rem; 
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease; 
+        }
+
+        input:focus, select:focus, textarea:focus { 
+            outline: none; 
+            border-color: var(--border-focus-color);
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+        
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px 12px;
+        }
+
+        select:disabled { 
+            background-color: #e9ecef; 
+            cursor: not-allowed; 
+            opacity: 0.7;
+        }
+
+        .radio-group, .checkbox-group { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 1.2rem;
+            padding-top: 5px;
+        }
+        
+        /* Custom Radio & Checkbox Styles */
+        .radio-group label, .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 400;
+            cursor: pointer;
+            position: relative;
+            padding-left: 30px; /* Space for custom control */
+        }
+
+        input[type="radio"], input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 1px;
+            height: 1px;
+        }
+        
+        .radio-group label::before, .checkbox-group label::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            background-color: #fff;
+            transition: all 0.2s ease;
+        }
+        .radio-group label::before { border-radius: 50%; }
+        .checkbox-group label::before { border-radius: 5px; }
+
+        input[type="radio"]:checked + label::before, 
+        input[type="checkbox"]:checked + label::before {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .radio-group label::after, .checkbox-group label::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        /* Radio Dot */
+        .radio-group label::after {
+            left: 6px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #fff;
+        }
+        /* Checkbox Mark */
+        .checkbox-group label::after {
+            left: 7px;
+            top: 40%;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            transform: translateY(-50%) rotate(45deg);
+        }
+
+        input[type="radio"]:checked + label::after,
+        input[type="checkbox"]:checked + label::after {
+            opacity: 1;
+        }
+
+        .inline-group { 
+            display: flex; 
+            gap: 1.5rem; 
+            align-items: flex-end;
+        }
+        .inline-group .form-group { 
+            flex: 1; 
+            margin-bottom: 0;
+        }
+
+        button[type="submit"] { 
+            width: 100%; 
+            padding: 16px; 
+            background: linear-gradient(90deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 1.2rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            margin-top: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button[type="submit"]:hover { 
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(0, 123, 255, 0.4);
+        }
+        
+        button[type="submit"]:disabled {
+            background: #b0bec5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Loading Spinner for button */
+        button[type="submit"].loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 25%;
+            margin-top: -10px;
+            margin-left: -10px;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+
+        #status-message { 
+            text-align: center; 
+            margin-top: 1.5rem; 
+            font-weight: 500; 
+            padding: 12px; 
+            border-radius: 8px; 
+            display: none; 
+        }
+        .success { background-color: var(--success-bg-color); color: var(--success-color); border: 1px solid #c3e6cb; }
+        .error { background-color: var(--error-bg-color); color: var(--error-color); border: 1px solid #f5c6cb; }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 1.5rem;
+            }
+            h1 {
+                font-size: 1.6rem;
+            }
+            .section-title {
+                font-size: 1.2rem;
+            }
+            .inline-group {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1.5rem;
+            }
+            .inline-group .form-group {
+                width: 100%;
+            }
+            body {
+                padding: 15px 10px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🏦 पतसंस्था ग्राउंड सर्व्हे फॉर्म</h1>
         <form id="survey-form">
-            <!-- Form fields from previous code -->
+            <!-- Form fields are unchanged -->
              <div class="form-group">
                 <label for="surveyNumber">1. सर्वे क्रमांक:</label>
                 <input type="text" id="surveyNumber" name="surveyNumber" required>
@@ -85,14 +348,14 @@
                 <div class="form-group">
                     <label>लिंग:</label>
                     <div class="radio-group">
-                        <label><input type="radio" name="gender" value="पुरुष" required> पुरुष</label>
-                        <label><input type="radio" name="gender" value="महिला"> महिला</label>
+                        <label><input type="radio" name="gender" value="पुरुष" required><span>पुरुष</span></label>
+                        <label><input type="radio" name="gender" value="महिला"><span>महिला</span></label>
                     </div>
                 </div>
             </div>
             <div class="form-group">
                 <label for="mobileNumber">4. मोबाईल क्रमांक:</label>
-                <input type="tel" id="mobileNumber" name="mobileNumber" pattern="[0-9]{10}" required>
+                <input type="tel" id="mobileNumber" name="mobileNumber" pattern="[0-9]{10}" placeholder="उदा. 9876543210" required>
             </div>
             <div class="form-group">
                 <label for="occupation">5. व्यवसाय:</label>
@@ -108,20 +371,20 @@
             <div class="form-group">
                 <label>7. सध्या तुम्ही कोणत्या ठिकाणी बचत करता?</label>
                 <div class="checkbox-group">
-                    <label><input type="checkbox" name="savingMethods" value="बँक"> बँक</label>
-                    <label><input type="checkbox" name="savingMethods" value="पतसंस्था"> पतसंस्था</label>
-                    <label><input type="checkbox" name="savingMethods" value="घरातच ठेवतो"> घरातच ठेवतो</label>
-                    <label><input type="checkbox" name="savingMethods" value="इतर"> इतर</label>
+                    <label><input type="checkbox" name="savingMethods" value="बँक"><span>बँक</span></label>
+                    <label><input type="checkbox" name="savingMethods" value="पतसंस्था"><span>पतसंस्था</span></label>
+                    <label><input type="checkbox" name="savingMethods" value="घरातच ठेवतो"><span>घरातच ठेवतो</span></label>
+                    <label><input type="checkbox" name="savingMethods" value="इतर"><span>इतर</span></label>
                 </div>
             </div>
              <div class="form-group">
                 <label>8. तुम्हाला कोणत्या सेवा घ्यायला आवडतील?</label>
                 <div class="checkbox-group">
-                    <label><input type="checkbox" name="interestedServices" value="पिग्मी"> पिग्मी (दैनिक बचत)</label>
-                    <label><input type="checkbox" name="interestedServices" value="बचत खाते"> नियमित बचत खाते</label>
-                    <label><input type="checkbox" name="interestedServices" value="आर.डी."> आर.डी. (मासिक ठेव)</label>
-                    <label><input type="checkbox" name="interestedServices" value="एफ.डी."> एफ.डी. (मुदत ठेव)</label>
-                    <label><input type="checkbox" name="interestedServices" value="कर्ज"> कर्ज सुविधा</label>
+                    <label><input type="checkbox" name="interestedServices" value="पिग्मी"><span>पिग्मी (दैनिक बचत)</span></label>
+                    <label><input type="checkbox" name="interestedServices" value="बचत खाते"><span>नियमित बचत खाते</span></label>
+                    <label><input type="checkbox" name="interestedServices" value="आर.डी."><span>आर.डी. (मासिक ठेव)</span></label>
+                    <label><input type="checkbox" name="interestedServices" value="एफ.डी."><span>एफ.डी. (मुदत ठेव)</span></label>
+                    <label><input type="checkbox" name="interestedServices" value="कर्ज"><span>कर्ज सुविधा</span></label>
                 </div>
             </div>
             <div class="form-group">
@@ -129,8 +392,8 @@
                 <div class="inline-group">
                     <input type="number" name="savingAmount" placeholder="₹ रक्कम" required>
                     <div class="radio-group" style="align-items:center;">
-                        <label><input type="radio" name="savingFrequency" value="प्रति दिवस" required> प्रति दिवस</label>
-                        <label><input type="radio" name="savingFrequency" value="प्रति महिना"> प्रति महिना</label>
+                        <label><input type="radio" name="savingFrequency" value="प्रति दिवस" required><span>प्रति दिवस</span></label>
+                        <label><input type="radio" name="savingFrequency" value="प्रति महिना"><span>प्रति महिना</span></label>
                     </div>
                 </div>
             </div>
@@ -139,23 +402,23 @@
             <div class="form-group">
                 <label>10. तुमच्याकडे स्मार्टफोन आहे का?</label>
                  <div class="radio-group">
-                    <label><input type="radio" name="hasSmartphone" value="होय" required> होय</label>
-                    <label><input type="radio" name="hasSmartphone" value="नाही"> नाही</label>
+                    <label><input type="radio" name="hasSmartphone" value="होय" required><span>होय</span></label>
+                    <label><input type="radio" name="hasSmartphone" value="नाही"><span>नाही</span></label>
                 </div>
             </div>
             <div class="form-group">
                 <label>11. तुम्ही Google Pay / PhonePe / UPI वापरता का?</label>
                  <div class="radio-group">
-                    <label><input type="radio" name="usesUpi" value="होय" required> होय</label>
-                    <label><input type="radio" name="usesUpi" value="नाही"> नाही</label>
+                    <label><input type="radio" name="usesUpi" value="होय" required><span>होय</span></label>
+                    <label><input type="radio" name="usesUpi" value="नाही"><span>नाही</span></label>
                 </div>
             </div>
             <div class="form-group">
                 <label>12. तुम्हाला ऑनलाइन पैसे जमा करणे सोपे वाटते का?</label>
                  <div class="radio-group">
-                    <label><input type="radio" name="onlinePaymentComfort" value="होय" required> होय</label>
-                    <label><input type="radio" name="onlinePaymentComfort" value="नाही"> नाही</label>
-                    <label><input type="radio" name="onlinePaymentComfort" value="मार्गदर्शन हवे आहे"> मार्गदर्शन हवे आहे</label>
+                    <label><input type="radio" name="onlinePaymentComfort" value="होय" required><span>होय</span></label>
+                    <label><input type="radio" name="onlinePaymentComfort" value="नाही"><span>नाही</span></label>
+                    <label><input type="radio" name="onlinePaymentComfort" value="मार्गदर्शन हवे आहे"><span>मार्गदर्शन हवे आहे</span></label>
                 </div>
             </div>
 
@@ -167,8 +430,8 @@
             <div class="form-group">
                 <label>14. घरात इतर कोणाला पतसंस्थेच्या सेवांमध्ये रस आहे का?</label>
                  <div class="radio-group">
-                    <label><input type="radio" name="othersInterested" value="होय" required> होय</label>
-                    <label><input type="radio" name="othersInterested" value="नाही"> नाही</label>
+                    <label><input type="radio" name="othersInterested" value="होय" required><span>होय</span></label>
+                    <label><input type="radio" name="othersInterested" value="नाही"><span>नाही</span></label>
                 </div>
             </div>
             <div class="form-group">
@@ -197,7 +460,6 @@
 
     let talukaVillageData = {};
 
-    // 1. Google Sheets API वापरून तालुका-गावांची यादी लोड करा
     async function loadMasterData() {
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${MASTER_SHEET_NAME}!A2:B?key=${API_KEY}`;
         try {
@@ -206,7 +468,6 @@
             const rows = data.values;
 
             if (rows && rows.length > 0) {
-                // डेटाला आपल्या गरजेनुसार रूपांतरित करा { "तालुका": ["गाव१", "गाव२"] }
                 rows.forEach(row => {
                     const taluka = row[0];
                     const village = row[1];
@@ -227,7 +488,6 @@
         }
     }
 
-    // 2. तालुका ड्रॉपडाउन भरा
     function populateTalukas() {
         const talukas = Object.keys(talukaVillageData);
         talukaSelect.innerHTML = '<option value="">तालुका निवडा</option>';
@@ -239,7 +499,6 @@
         });
     }
 
-    // 3. तालुका निवडल्यावर गावांची यादी बदला
     talukaSelect.addEventListener('change', () => {
         const selectedTaluka = talukaSelect.value;
         villageSelect.innerHTML = '<option value="">गाव निवडा</option>';
@@ -255,12 +514,12 @@
         }
     });
 
-    // 4. फॉर्म सबमिशन प्रक्रिया (Apps Script Web App वापरून)
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         
         submitButton.disabled = true;
         submitButton.textContent = 'जमा होत आहे...';
+        submitButton.classList.add('loading'); // Add loading class for spinner
         statusMessage.style.display = 'none';
 
         const formData = new FormData(form);
@@ -308,11 +567,11 @@
             statusMessage.style.display = 'block';
             submitButton.disabled = false;
             submitButton.textContent = 'फॉर्म जमा करा';
+            submitButton.classList.remove('loading'); // Remove loading class
             window.scrollTo(0, document.body.scrollHeight);
         });
     });
 
-    // पेज लोड झाल्यावर मास्टर डेटा लोड करा
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('surveyDate').valueAsDate = new Date();
         loadMasterData();
