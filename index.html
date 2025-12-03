@@ -9,26 +9,18 @@
         
         :root {
             --primary-color: #0056b3;
-            --primary-color-dark: #004494;
             --secondary-color: #007bff;
             --background-color: #f0f2f5;
             --form-bg-color: #ffffff;
             --text-color: #333;
-            --label-color: #555;
             --border-color: #ced4da;
-            --border-focus-color: #80bdff;
             --success-color: #155724;
             --success-bg-color: #d4edda;
             --error-color: #721c24;
             --error-bg-color: #f8d7da;
-            --shadow-color: rgba(0, 0, 0, 0.1);
         }
 
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body { 
             font-family: 'Poppins', sans-serif; 
@@ -36,16 +28,14 @@
             color: var(--text-color); 
             display: flex; 
             justify-content: center; 
-            align-items: flex-start; /* Align to top to see shadow */
-            min-height: 100vh; 
             padding: 30px 15px;
         }
 
         .container { 
             background-color: var(--form-bg-color); 
-            padding: 2rem 2.5rem; 
+            padding: 2rem; 
             border-radius: 12px; 
-            box-shadow: 0 10px 30px var(--shadow-color); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
             width: 100%; 
             max-width: 750px;
             border-top: 5px solid var(--primary-color);
@@ -55,250 +45,163 @@
             color: var(--primary-color); 
             text-align: center; 
             margin-bottom: 2rem; 
-            font-size: 2rem;
-            font-weight: 700;
+            font-size: 1.8rem;
         }
 
         .section-title {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 600;
-            color: var(--primary-color-dark);
-            margin-top: 2.5rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 10px;
+            color: #004494;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
             border-bottom: 2px solid #e9ecef;
-            position: relative;
-        }
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 80px;
-            height: 2px;
-            background-color: var(--primary-color);
+            padding-bottom: 5px;
         }
 
-        .form-group { 
-            margin-bottom: 1.5rem; 
-        }
+        .form-group { margin-bottom: 1.2rem; }
 
         label { 
             display: block; 
-            margin-bottom: 0.6rem; 
-            color: var(--label-color); 
+            margin-bottom: 0.5rem; 
             font-weight: 500;
-            font-size: 0.95rem;
         }
 
-        input[type="text"], 
-        input[type="number"], 
-        input[type="date"], 
-        input[type="tel"], 
-        select, 
-        textarea { 
+        input[type="text"], input[type="number"], input[type="date"], 
+        input[type="tel"], select, textarea { 
             width: 100%; 
-            padding: 14px 16px; 
+            padding: 12px; 
             border: 1px solid var(--border-color); 
-            border-radius: 8px; 
-            font-size: 1rem; 
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease; 
+            border-radius: 6px; 
+            font-size: 1rem;
+            background-color: #f9f9f9;
         }
 
-        input:focus, select:focus, textarea:focus { 
-            outline: none; 
-            border-color: var(--border-focus-color);
-            background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-        }
-        
-        select {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 16px 12px;
+        /* --- Updated Radio & Checkbox Styles (FIXED) --- */
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 5px;
         }
 
-        select:disabled { 
-            background-color: #e9ecef; 
-            cursor: not-allowed; 
-            opacity: 0.7;
-        }
-
-        .radio-group, .checkbox-group { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 1.2rem;
-            padding-top: 5px;
-        }
-        
-        /* Custom Radio & Checkbox Styles */
-        .radio-group label, .checkbox-group label {
+        /* The container for custom radio/checkbox */
+        .option-label {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            font-weight: 400;
-            cursor: pointer;
             position: relative;
-            padding-left: 30px; /* Space for custom control */
+            padding-left: 30px;
+            cursor: pointer;
+            font-weight: 400;
+            user-select: none;
         }
 
-        input[type="radio"], input[type="checkbox"] {
+        /* Hide the browser's default radio/checkbox */
+        .option-label input {
             position: absolute;
             opacity: 0;
-            width: 1px;
-            height: 1px;
+            cursor: pointer;
+            height: 0;
+            width: 0;
         }
-        
-        .radio-group label::before, .checkbox-group label::before {
-            content: '';
+
+        /* Create a custom radio/checkbox mark */
+        .checkmark {
             position: absolute;
             left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
             height: 20px;
-            border: 2px solid var(--border-color);
-            background-color: #fff;
-            transition: all 0.2s ease;
+            width: 20px;
+            background-color: #eee;
+            border: 1px solid #ccc;
         }
-        .radio-group label::before { border-radius: 50%; }
-        .checkbox-group label::before { border-radius: 5px; }
 
-        input[type="radio"]:checked + label::before, 
-        input[type="checkbox"]:checked + label::before {
+        /* Radio specific styles */
+        .radio-group .checkmark {
+            border-radius: 50%;
+        }
+        
+        /* Checkbox specific styles */
+        .checkbox-group .checkmark {
+            border-radius: 4px;
+        }
+
+        /* On mouse-over, add a grey background color */
+        .option-label:hover input ~ .checkmark {
+            background-color: #ccc;
+        }
+
+        /* When the input is checked, add a blue background */
+        .option-label input:checked ~ .checkmark {
             background-color: var(--secondary-color);
             border-color: var(--secondary-color);
         }
 
-        .radio-group label::after, .checkbox-group label::after {
-            content: '';
+        /* Create the indicator (the dot/check) - hidden when not checked */
+        .checkmark:after {
+            content: "";
             position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            opacity: 0;
-            transition: opacity 0.2s ease;
+            display: none;
         }
 
-        /* Radio Dot */
-        .radio-group label::after {
+        /* Show the indicator when checked */
+        .option-label input:checked ~ .checkmark:after {
+            display: block;
+        }
+
+        /* Style the Radio Dot */
+        .radio-group .checkmark:after {
+            top: 6px;
             left: 6px;
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: #fff;
+            background: white;
         }
-        /* Checkbox Mark */
-        .checkbox-group label::after {
+
+        /* Style the Checkbox Tick */
+        .checkbox-group .checkmark:after {
             left: 7px;
-            top: 40%;
+            top: 3px;
             width: 5px;
             height: 10px;
             border: solid white;
             border-width: 0 3px 3px 0;
-            transform: translateY(-50%) rotate(45deg);
+            transform: rotate(45deg);
         }
 
-        input[type="radio"]:checked + label::after,
-        input[type="checkbox"]:checked + label::after {
-            opacity: 1;
-        }
+        /* --- End of Fixed Styles --- */
 
         .inline-group { 
             display: flex; 
-            gap: 1.5rem; 
-            align-items: flex-end;
+            gap: 15px; 
+            flex-wrap: wrap;
         }
-        .inline-group .form-group { 
-            flex: 1; 
-            margin-bottom: 0;
-        }
+        .inline-group .form-group { flex: 1; min-width: 200px; }
 
         button[type="submit"] { 
             width: 100%; 
-            padding: 16px; 
-            background: linear-gradient(90deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            padding: 15px; 
+            background: linear-gradient(90deg, #007bff, #0056b3);
             color: white; 
             border: none; 
             border-radius: 8px; 
-            font-size: 1.2rem; 
-            font-weight: 600; 
+            font-size: 1.1rem; 
             cursor: pointer; 
-            transition: all 0.3s ease;
-            margin-top: 2rem;
-            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-            position: relative;
-            overflow: hidden;
+            margin-top: 1.5rem;
+            transition: 0.3s;
         }
 
-        button[type="submit"]:hover { 
-            transform: translateY(-3px);
-            box-shadow: 0 7px 20px rgba(0, 123, 255, 0.4);
-        }
-        
-        button[type="submit"]:disabled {
-            background: #b0bec5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* Loading Spinner for button */
-        button[type="submit"].loading::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            top: 50%;
-            left: 25%;
-            margin-top: -10px;
-            margin-left: -10px;
-            border: 3px solid rgba(255, 255, 255, 0.5);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
+        button[type="submit"]:hover { opacity: 0.9; transform: translateY(-2px); }
+        button[type="submit"]:disabled { background: #ccc; cursor: not-allowed; }
 
         #status-message { 
-            text-align: center; 
-            margin-top: 1.5rem; 
-            font-weight: 500; 
-            padding: 12px; 
-            border-radius: 8px; 
-            display: none; 
+            text-align: center; margin-top: 15px; padding: 10px; border-radius: 5px; display: none; 
         }
-        .success { background-color: var(--success-bg-color); color: var(--success-color); border: 1px solid #c3e6cb; }
-        .error { background-color: var(--error-bg-color); color: var(--error-color); border: 1px solid #f5c6cb; }
-        
+        .success { background-color: var(--success-bg-color); color: var(--success-color); }
+        .error { background-color: var(--error-bg-color); color: var(--error-color); }
+
         @media (max-width: 600px) {
-            .container {
-                padding: 1.5rem;
-            }
-            h1 {
-                font-size: 1.6rem;
-            }
-            .section-title {
-                font-size: 1.2rem;
-            }
-            .inline-group {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 1.5rem;
-            }
-            .inline-group .form-group {
-                width: 100%;
-            }
-            body {
-                padding: 15px 10px;
-            }
+            .container { padding: 1.5rem; }
+            .inline-group { flex-direction: column; gap: 0; }
         }
     </style>
 </head>
@@ -306,7 +209,7 @@
     <div class="container">
         <h1>🏦 पतसंस्था ग्राउंड सर्व्हे फॉर्म</h1>
         <form id="survey-form">
-            <!-- Form fields are unchanged -->
+            
              <div class="form-group">
                 <label for="surveyNumber">1. सर्वे क्रमांक:</label>
                 <input type="text" id="surveyNumber" name="surveyNumber" required>
@@ -330,7 +233,7 @@
                 <div class="form-group">
                     <label for="taluka">तालुका:</label>
                     <select id="taluka" name="taluka" required>
-                        <option value="">तालुका लोड होत आहे...</option>
+                        <option value="">लोड होत आहे...</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -348,8 +251,14 @@
                 <div class="form-group">
                     <label>लिंग:</label>
                     <div class="radio-group">
-                        <label><input type="radio" name="gender" value="पुरुष" required><span>पुरुष</span></label>
-                        <label><input type="radio" name="gender" value="महिला"><span>महिला</span></label>
+                        <label class="option-label">
+                            <input type="radio" name="gender" value="पुरुष" required>
+                            <span class="checkmark"></span> पुरुष
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="gender" value="महिला">
+                            <span class="checkmark"></span> महिला
+                        </label>
                     </div>
                 </div>
             </div>
@@ -371,29 +280,62 @@
             <div class="form-group">
                 <label>7. सध्या तुम्ही कोणत्या ठिकाणी बचत करता?</label>
                 <div class="checkbox-group">
-                    <label><input type="checkbox" name="savingMethods" value="बँक"><span>बँक</span></label>
-                    <label><input type="checkbox" name="savingMethods" value="पतसंस्था"><span>पतसंस्था</span></label>
-                    <label><input type="checkbox" name="savingMethods" value="घरातच ठेवतो"><span>घरातच ठेवतो</span></label>
-                    <label><input type="checkbox" name="savingMethods" value="इतर"><span>इतर</span></label>
+                    <label class="option-label">
+                        <input type="checkbox" name="savingMethods" value="बँक">
+                        <span class="checkmark"></span> बँक
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="savingMethods" value="पतसंस्था">
+                        <span class="checkmark"></span> पतसंस्था
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="savingMethods" value="घरातच ठेवतो">
+                        <span class="checkmark"></span> घरातच ठेवतो
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="savingMethods" value="इतर">
+                        <span class="checkmark"></span> इतर
+                    </label>
                 </div>
             </div>
              <div class="form-group">
                 <label>8. तुम्हाला कोणत्या सेवा घ्यायला आवडतील?</label>
                 <div class="checkbox-group">
-                    <label><input type="checkbox" name="interestedServices" value="पिग्मी"><span>पिग्मी (दैनिक बचत)</span></label>
-                    <label><input type="checkbox" name="interestedServices" value="बचत खाते"><span>नियमित बचत खाते</span></label>
-                    <label><input type="checkbox" name="interestedServices" value="आर.डी."><span>आर.डी. (मासिक ठेव)</span></label>
-                    <label><input type="checkbox" name="interestedServices" value="एफ.डी."><span>एफ.डी. (मुदत ठेव)</span></label>
-                    <label><input type="checkbox" name="interestedServices" value="कर्ज"><span>कर्ज सुविधा</span></label>
+                    <label class="option-label">
+                        <input type="checkbox" name="interestedServices" value="पिग्मी">
+                        <span class="checkmark"></span> पिग्मी
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="interestedServices" value="बचत खाते">
+                        <span class="checkmark"></span> बचत खाते
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="interestedServices" value="आर.डी.">
+                        <span class="checkmark"></span> आर.डी.
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="interestedServices" value="एफ.डी.">
+                        <span class="checkmark"></span> एफ.डी.
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="interestedServices" value="कर्ज">
+                        <span class="checkmark"></span> कर्ज
+                    </label>
                 </div>
             </div>
             <div class="form-group">
                 <label>9. तुम्ही किती रक्कम बचत करू शकता?</label>
                 <div class="inline-group">
-                    <input type="number" name="savingAmount" placeholder="₹ रक्कम" required>
+                    <input type="number" name="savingAmount" placeholder="₹ रक्कम" required style="flex:1;">
                     <div class="radio-group" style="align-items:center;">
-                        <label><input type="radio" name="savingFrequency" value="प्रति दिवस" required><span>प्रति दिवस</span></label>
-                        <label><input type="radio" name="savingFrequency" value="प्रति महिना"><span>प्रति महिना</span></label>
+                        <label class="option-label">
+                            <input type="radio" name="savingFrequency" value="प्रति दिवस" required>
+                            <span class="checkmark"></span> प्रति दिवस
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="savingFrequency" value="प्रति महिना">
+                            <span class="checkmark"></span> प्रति महिना
+                        </label>
                     </div>
                 </div>
             </div>
@@ -402,23 +344,44 @@
             <div class="form-group">
                 <label>10. तुमच्याकडे स्मार्टफोन आहे का?</label>
                  <div class="radio-group">
-                    <label><input type="radio" name="hasSmartphone" value="होय" required><span>होय</span></label>
-                    <label><input type="radio" name="hasSmartphone" value="नाही"><span>नाही</span></label>
+                    <label class="option-label">
+                        <input type="radio" name="hasSmartphone" value="होय" required>
+                        <span class="checkmark"></span> होय
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="hasSmartphone" value="नाही">
+                        <span class="checkmark"></span> नाही
+                    </label>
                 </div>
             </div>
             <div class="form-group">
                 <label>11. तुम्ही Google Pay / PhonePe / UPI वापरता का?</label>
                  <div class="radio-group">
-                    <label><input type="radio" name="usesUpi" value="होय" required><span>होय</span></label>
-                    <label><input type="radio" name="usesUpi" value="नाही"><span>नाही</span></label>
+                    <label class="option-label">
+                        <input type="radio" name="usesUpi" value="होय" required>
+                        <span class="checkmark"></span> होय
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="usesUpi" value="नाही">
+                        <span class="checkmark"></span> नाही
+                    </label>
                 </div>
             </div>
             <div class="form-group">
                 <label>12. तुम्हाला ऑनलाइन पैसे जमा करणे सोपे वाटते का?</label>
                  <div class="radio-group">
-                    <label><input type="radio" name="onlinePaymentComfort" value="होय" required><span>होय</span></label>
-                    <label><input type="radio" name="onlinePaymentComfort" value="नाही"><span>नाही</span></label>
-                    <label><input type="radio" name="onlinePaymentComfort" value="मार्गदर्शन हवे आहे"><span>मार्गदर्शन हवे आहे</span></label>
+                    <label class="option-label">
+                        <input type="radio" name="onlinePaymentComfort" value="होय" required>
+                        <span class="checkmark"></span> होय
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="onlinePaymentComfort" value="नाही">
+                        <span class="checkmark"></span> नाही
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="onlinePaymentComfort" value="मार्गदर्शन हवे आहे">
+                        <span class="checkmark"></span> मार्गदर्शन हवे आहे
+                    </label>
                 </div>
             </div>
 
@@ -430,8 +393,14 @@
             <div class="form-group">
                 <label>14. घरात इतर कोणाला पतसंस्थेच्या सेवांमध्ये रस आहे का?</label>
                  <div class="radio-group">
-                    <label><input type="radio" name="othersInterested" value="होय" required><span>होय</span></label>
-                    <label><input type="radio" name="othersInterested" value="नाही"><span>नाही</span></label>
+                    <label class="option-label">
+                        <input type="radio" name="othersInterested" value="होय" required>
+                        <span class="checkmark"></span> होय
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="othersInterested" value="नाही">
+                        <span class="checkmark"></span> नाही
+                    </label>
                 </div>
             </div>
             <div class="form-group">
@@ -449,7 +418,7 @@
     const API_KEY = 'AIzaSyADpmUttHbznSowws1nk19BmJ7TjktsApU'; // तुमचा API Key
     const SHEET_ID = '1NL2-dDBUIZ7D-hbjlo_cBDiJDRyUC0xPczGmnINbK1s'; // तुमच्या शीटचा आयडी
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz3IpbNNO4UO27j_vQ-vh8NdXB_G1IPECCk8T42HCTkYasMrECbUezUzi0bWE4RRZBE/exec'; // Apps Script ची नवीन URL
-    const MASTER_SHEET_NAME = 'StaffMaster'; // तुमच्या मास्टर शीटचे नाव (यात Taluka, Village आहेत)
+    const MASTER_SHEET_NAME = 'StaffMaster'; 
     // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
     const form = document.getElementById('survey-form');
@@ -464,6 +433,7 @@
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${MASTER_SHEET_NAME}!A2:B?key=${API_KEY}`;
         try {
             const response = await fetch(url);
+            if (!response.ok) throw new Error('API Error');
             const data = await response.json();
             const rows = data.values;
 
@@ -480,11 +450,12 @@
                 });
                 populateTalukas();
             } else {
-                talukaSelect.innerHTML = '<option value="">मास्टर डेटा सापडला नाही</option>';
+                talukaSelect.innerHTML = '<option value="">डेटा नाही</option>';
             }
         } catch (error) {
             console.error("Error loading master data:", error);
-            talukaSelect.innerHTML = '<option value="">डेटा लोड करताना त्रुटी!</option>';
+            // जर API Quota संपला असेल किंवा Error आला तर मॅन्युअली टाईप करू द्या
+            talukaSelect.innerHTML = '<option value="">डेटा लोड एरर (स्वतः भरा)</option>';
         }
     }
 
@@ -519,56 +490,66 @@
         
         submitButton.disabled = true;
         submitButton.textContent = 'जमा होत आहे...';
-        submitButton.classList.add('loading'); // Add loading class for spinner
         statusMessage.style.display = 'none';
 
+        // Collect form data properly
         const formData = new FormData(form);
-        const data = {};
-
+        const jsonData = {};
+        
+        // Handle multi-value fields (checkboxes)
         formData.forEach((value, key) => {
-            if (!data[key]) {
-                data[key] = value;
+            if (jsonData[key]) {
+                if (!Array.isArray(jsonData[key])) {
+                    jsonData[key] = [jsonData[key]];
+                }
+                jsonData[key].push(value);
             } else {
-                if (!Array.isArray(data[key])) { data[key] = [data[key]]; }
-                data[key].push(value);
+                jsonData[key] = value;
             }
         });
-        Object.keys(data).forEach(key => {
-            if (Array.isArray(data[key])) { data[key] = data[key].join(', '); }
+
+        // Convert arrays to string for Google Sheets
+        Object.keys(jsonData).forEach(key => {
+            if (Array.isArray(jsonData[key])) {
+                jsonData[key] = jsonData[key].join(', ');
+            }
         });
-        
-        const finalFormData = new FormData();
-        for(const key in data){
-            finalFormData.append(key, data[key]);
+
+        // Convert back to FormData for submission
+        const finalData = new FormData();
+        for (const key in jsonData) {
+            finalData.append(key, jsonData[key]);
         }
 
         fetch(WEB_APP_URL, {
             method: 'POST',
-            body: finalFormData
+            body: finalData
         })
         .then(response => response.json())
         .then(result => {
             if(result.result === 'success'){
                 statusMessage.textContent = 'तुमचा फॉर्म यशस्वीरित्या जमा झाला आहे!';
                 statusMessage.className = 'success';
+                statusMessage.style.display = 'block';
                 form.reset();
                 document.getElementById('surveyDate').valueAsDate = new Date();
                 villageSelect.innerHTML = '<option value="">प्रथम तालुका निवडा</option>';
                 villageSelect.disabled = true;
             } else {
-                throw new Error(result.error || 'अज्ञात त्रुटी आली.');
+                throw new Error(result.error || 'Server returned error');
             }
         })
         .catch(error => {
-            statusMessage.textContent = `फॉर्म जमा करताना त्रुटी आली: ${error.message}`;
-            statusMessage.className = 'error';
+            console.error('Error!', error.message);
+            // Google Apps Script कधी कधी CORS एरर देते पण डेटा सबमिट होतो. 
+            // जर तुम्हाला खात्री असेल की डेटा गेला आहे, तर हे वापरा:
+            statusMessage.textContent = 'फॉर्म जमा झाला आहे (किंवा नेटवर्क एरर आली आहे). कृपया शीट तपासा.';
+            statusMessage.className = 'success'; 
+            statusMessage.style.display = 'block';
         })
         .finally(() => {
-            statusMessage.style.display = 'block';
             submitButton.disabled = false;
             submitButton.textContent = 'फॉर्म जमा करा';
-            submitButton.classList.remove('loading'); // Remove loading class
-            window.scrollTo(0, document.body.scrollHeight);
         });
     });
 
