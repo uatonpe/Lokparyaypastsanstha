@@ -3,334 +3,507 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>लाइव्ह आर्थिक सर्वेक्षण डॅशबोर्ड</title>
+    <title>संपूर्ण आर्थिक सर्वेक्षण डॅशबोर्ड (Complete Survey Analytics)</title>
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     
-    <!-- Libraries: Chart.js for graphs, PapaParse for CSV reading -->
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
     <style>
         :root {
-            --bg-color: #f3f4f6;
+            --bg-color: #f0f2f5;
             --card-bg: #ffffff;
-            --primary: #2563eb;
-            --text-main: #1f2937;
+            --primary: #0078d4; /* PowerBI Blue */
+            --secondary: #2b88d8;
+            --text-dark: #252423;
+            --text-light: #605e5c;
+            --success: #107c10;
+            --warning: #d13438;
+            --purple: #5c2d91;
+            --teal: #008272;
         }
 
         body {
-            font-family: 'Poppins', 'Noto Sans Devanagari', sans-serif;
+            font-family: 'Roboto', 'Noto Sans Devanagari', sans-serif;
             background-color: var(--bg-color);
             margin: 0;
-            padding: 20px;
-            color: var(--text-main);
+            padding: 0;
+            color: var(--text-dark);
         }
 
-        /* Loading Spinner */
+        /* Loading Overlay */
         #loader {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            z-index: 1000;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; z-index: 9999;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
         }
         .spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--primary);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
+            width: 50px; height: 50px; border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 15px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Header */
-        header {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
+        /* Top Bar */
+        .top-bar {
+            background: #fff; padding: 15px 25px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100;
         }
+        .app-title { font-size: 1.4rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .last-updated { font-size: 0.85rem; color: var(--text-light); background: #e1dfdd; padding: 5px 12px; border-radius: 15px; }
 
-        h1 { margin: 0; font-size: 1.5rem; color: #111827; }
-        .status-badge {
-            background: #dcfce7; color: #166534;
-            padding: 5px 15px; border-radius: 20px;
-            font-size: 0.85rem; font-weight: 600;
-            display: flex; align-items: center; gap: 5px;
+        /* Main Container */
+        .container { padding: 20px; max-width: 1400px; margin: 0 auto; }
+
+        /* KPI Section (Top Row) */
+        .kpi-row {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px; margin-bottom: 20px;
         }
-        .live-dot { height: 8px; width: 8px; background-color: #166534; border-radius: 50%; display: inline-block; }
-
-        /* KPI Grid */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
         .kpi-card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            border-left: 4px solid var(--primary);
+            background: var(--card-bg); padding: 20px; border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-bottom: 4px solid transparent;
+            display: flex; flex-direction: column; justify-content: space-between;
         }
-        
-        .kpi-card:nth-child(2) { border-left-color: #10b981; } /* Green */
-        .kpi-card:nth-child(3) { border-left-color: #8b5cf6; } /* Purple */
-        .kpi-card:nth-child(4) { border-left-color: #f59e0b; } /* Orange */
+        .kpi-card:hover { transform: translateY(-2px); transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .kpi-label { font-size: 0.9rem; color: var(--text-light); margin-bottom: 5px; font-weight: 600; }
+        .kpi-value { font-size: 2rem; font-weight: 700; color: var(--text-dark); }
+        .kpi-sub { font-size: 0.8rem; color: var(--success); margin-top: 5px; }
 
-        .kpi-label { font-size: 0.9rem; color: #6b7280; margin-bottom: 5px; }
-        .kpi-value { font-size: 1.8rem; font-weight: 700; color: #111827; }
+        /* Color Coding KPIs */
+        .k-blue { border-bottom-color: var(--primary); }
+        .k-green { border-bottom-color: var(--success); }
+        .k-purple { border-bottom-color: var(--purple); }
+        .k-teal { border-bottom-color: var(--teal); }
+        .k-red { border-bottom-color: var(--warning); }
 
-        /* Charts Section */
-        .charts-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .chart-box {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            height: 350px;
-        }
-        
-        .box-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #f0f0f0;
-            padding-bottom: 10px;
+        /* Grid Layout for Charts */
+        .dashboard-grid {
+            display: grid; grid-template-columns: repeat(12, 1fr);
+            gap: 20px; margin-bottom: 20px;
         }
 
-        /* Suggestions Table */
-        .table-box {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            overflow-x: auto;
+        /* Generic Card Style */
+        .chart-card {
+            background: var(--card-bg); border-radius: 4px; padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column;
+        }
+        .card-header {
+            font-size: 1.1rem; font-weight: 600; color: var(--text-dark);
+            margin-bottom: 15px; border-bottom: 1px solid #e1dfdd; padding-bottom: 10px;
+            display: flex; justify-content: space-between;
         }
 
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        th { text-align: left; padding: 12px; background: #f8fafc; color: #64748b; border-bottom: 2px solid #e2e8f0; }
-        td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
-        tr:hover { background-color: #f8fafc; }
+        /* Specific Sizes */
+        .col-3 { grid-column: span 3; }
+        .col-4 { grid-column: span 4; }
+        .col-6 { grid-column: span 6; }
+        .col-8 { grid-column: span 8; }
+        .col-12 { grid-column: span 12; }
 
-        @media (max-width: 600px) {
-            .charts-container { grid-template-columns: 1fr; }
-            h1 { font-size: 1.2rem; }
+        .chart-container { position: relative; height: 280px; width: 100%; }
+        .small-chart { height: 200px; }
+
+        /* Custom Progress Bars (For Digital Literacy) */
+        .progress-item { margin-bottom: 15px; }
+        .progress-label { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
+        .progress-bg { height: 10px; background: #e1dfdd; border-radius: 5px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 5px; transition: width 1s ease-in-out; }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .data-table th { text-align: left; background: #f3f2f1; padding: 10px; color: var(--text-light); }
+        .data-table td { border-bottom: 1px solid #e1dfdd; padding: 8px 10px; }
+        .table-scroll { max-height: 400px; overflow-y: auto; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .col-3, .col-4, .col-6, .col-8 { grid-column: span 12; }
+        }
+        @media (max-width: 768px) {
+            .kpi-row { grid-template-columns: 1fr 1fr; }
+            .app-title { font-size: 1.1rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Loading Screen -->
+    <!-- Loading -->
     <div id="loader">
         <div class="spinner"></div>
-        <p>Google Sheet वरून डेटा लोड होत आहे...</p>
+        <h3>सर्वेक्षण डेटा लोड होत आहे...</h3>
+        <p>Google Sheets वरून कनेक्ट करत आहे</p>
     </div>
 
-    <!-- Main Content -->
-    <div id="dashboard" style="display:none;">
-        <header>
-            <div>
-                <h1>📊 सर्वेक्षण विश्लेषण (Survey Dashboard)</h1>
-                <p style="margin:5px 0 0; color:#666; font-size:0.9rem;">कळंब तालुका | Nagzarwadi & Lohata Purv</p>
-            </div>
-            <div class="status-badge"><span class="live-dot"></span> Live Connected</div>
-        </header>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="app-title"><i class="fas fa-chart-line"></i> कळंब तालुका: आर्थिक सर्वेक्षण डॅशबोर्ड</div>
+        <div class="last-updated" id="updateTime">Live Data</div>
+    </div>
 
-        <!-- KPIs -->
-        <div class="kpi-grid">
-            <div class="kpi-card">
+    <div class="container" id="mainContent" style="display:none;">
+        
+        <!-- ROW 1: High Level KPIs -->
+        <div class="kpi-row">
+            <div class="kpi-card k-blue">
                 <div class="kpi-label">एकूण सर्वेक्षण (Total Surveys)</div>
-                <div class="kpi-value" id="totalSurveys">0</div>
+                <div class="kpi-value" id="kpiTotal">0</div>
+                <div class="kpi-sub"><i class="fas fa-user-check"></i> यशस्वी नोंदी</div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-label">सरासरी उत्पन्न (Avg Income)</div>
-                <div class="kpi-value">₹ <span id="avgIncome">0</span></div>
+            <div class="kpi-card k-green">
+                <div class="kpi-label">सरासरी मासिक उत्पन्न (Avg Income)</div>
+                <div class="kpi-value">₹<span id="kpiIncome">0</span></div>
+                <div class="kpi-sub">प्रति कुटुंब</div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-label">स्मार्टफोन वापर (Smartphone Users)</div>
-                <div class="kpi-value" id="smartphoneUsers">0%</div>
+            <div class="kpi-card k-purple">
+                <div class="kpi-label">संभाव्य मासिक बचत (Potential Saving)</div>
+                <div class="kpi-value">₹<span id="kpiSavingPot">0</span></div>
+                <div class="kpi-sub">एकूण जमा रक्कम (अंदाजित)</div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-label">कर्ज घेण्यास इच्छुक (Loan Interest)</div>
-                <div class="kpi-value" id="loanInterest">0</div>
+            <div class="kpi-card k-teal">
+                <div class="kpi-label">डिजिटल साक्षरता (Digital Users)</div>
+                <div class="kpi-value" id="kpiDigital">0%</div>
+                <div class="kpi-sub">स्मार्टफोन वापरकर्ते</div>
             </div>
-        </div>
-
-        <!-- Charts -->
-        <div class="charts-container">
-            <!-- Village Distribution -->
-            <div class="chart-box">
-                <div class="box-title">गावनिहाय सर्वेक्षण (Village Wise)</div>
-                <canvas id="villageChart"></canvas>
-            </div>
-
-            <!-- Savings Method -->
-            <div class="chart-box">
-                <div class="box-title">बचतीची पद्धत (Saving Methods)</div>
-                <canvas id="savingMethodChart"></canvas>
-            </div>
-
-            <!-- Interested Services -->
-            <div class="chart-box">
-                <div class="box-title">कोणत्या सेवेमध्ये रस आहे? (Services Interest)</div>
-                <canvas id="servicesChart"></canvas>
-            </div>
-
-            <!-- Gender Ratio -->
-            <div class="chart-box">
-                <div class="box-title">पुरुष vs महिला (Gender Ratio)</div>
-                <canvas id="genderChart"></canvas>
+            <div class="kpi-card k-red">
+                <div class="kpi-label">कर्ज मागणी (Loan Interest)</div>
+                <div class="kpi-value" id="kpiLoan">0</div>
+                <div class="kpi-sub">लोकांना कर्जाची गरज</div>
             </div>
         </div>
 
-        <!-- Suggestion Table -->
-        <div class="table-box">
-            <div class="box-title">📢 लोकांच्या प्रतिक्रिया आणि सूचना (Latest Feedback)</div>
-            <table id="feedbackTable">
-                <thead>
-                    <tr>
-                        <th>तारीख</th>
-                        <th>नाव</th>
-                        <th>गाव</th>
-                        <th>सूचना (Suggestion)</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+        <!-- ROW 2: Demographics & Financial Interest -->
+        <div class="dashboard-grid">
+            <!-- Services Interest -->
+            <div class="chart-card col-6">
+                <div class="card-header">
+                    <span><i class="fas fa-bullseye"></i> लोकांचा कल (Interested Services)</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="servicesChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Savings Method Preference -->
+            <div class="chart-card col-3">
+                <div class="card-header">
+                    <span><i class="fas fa-piggy-bank"></i> बचतीची पद्धत</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="methodChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Saving Frequency -->
+            <div class="chart-card col-3">
+                <div class="card-header">
+                    <span><i class="fas fa-clock"></i> बचतीची वारंवारता</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="freqChart"></canvas>
+                </div>
+            </div>
         </div>
+
+        <!-- ROW 3: Detailed Breakdown -->
+        <div class="dashboard-grid">
+            <!-- Digital Literacy Bars -->
+            <div class="chart-card col-4">
+                <div class="card-header">
+                    <span><i class="fas fa-mobile-alt"></i> डिजिटल तयारी (Digital Readiness)</span>
+                </div>
+                <div style="padding: 20px 0;">
+                    <div class="progress-item">
+                        <div class="progress-label"><span>स्मार्टफोन आहे (Has Smartphone)</span><span id="txtPhone">0%</span></div>
+                        <div class="progress-bg"><div class="progress-fill" id="barPhone" style="width:0%; background:#0078d4;"></div></div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label"><span>UPI वापरतात (Uses UPI)</span><span id="txtUpi">0%</span></div>
+                        <div class="progress-bg"><div class="progress-fill" id="barUpi" style="width:0%; background:#107c10;"></div></div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label"><span>ऑनलाईन पेमेंटला कम्फर्ट (Online Comfort)</span><span id="txtComfort">0%</span></div>
+                        <div class="progress-bg"><div class="progress-fill" id="barComfort" style="width:0%; background:#5c2d91;"></div></div>
+                    </div>
+                </div>
+                <div class="chart-container small-chart">
+                    <canvas id="genderChart"></canvas> <!-- Putting Gender here to save space -->
+                </div>
+            </div>
+
+            <!-- Occupation Breakdown -->
+            <div class="chart-card col-4">
+                <div class="card-header">
+                    <span><i class="fas fa-briefcase"></i> व्यवसाय (Occupation)</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="occupChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Surveyor Performance -->
+            <div class="chart-card col-4">
+                <div class="card-header">
+                    <span><i class="fas fa-users-cog"></i> सर्व्हेअर कामगिरी (Surveyor Stats)</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="surveyorChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 4: Village & Family Stats -->
+        <div class="dashboard-grid">
+             <div class="chart-card col-6">
+                <div class="card-header">
+                    <span><i class="fas fa-map-marker-alt"></i> गावनिहाय वितरण (Village Wise)</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="villageChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-card col-6">
+                 <div class="card-header">
+                    <span><i class="fas fa-rupee-sign"></i> बचतीची क्षमता (Willingness to Save Amount)</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="amountChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 5: Data Table & Suggestions -->
+        <div class="chart-card col-12">
+            <div class="card-header">
+                <span><i class="fas fa-comment-dots"></i> महत्त्वाच्या प्रतिक्रिया आणि सूचना (Feedback & Suggestions)</span>
+            </div>
+            <div class="table-scroll">
+                <table class="data-table" id="feedbackTable">
+                    <thead>
+                        <tr>
+                            <th>दिनांक</th>
+                            <th>नाव</th>
+                            <th>गाव</th>
+                            <th>फोन</th>
+                            <th>व्यवसाय</th>
+                            <th>सूचना/प्रतिक्रिया (Feedback)</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // तुमची Google Sheet लिंक (CSV फॉरमॅट मध्ये रूपांतरित केलेली)
+        // --- CONFIGURATION ---
+        // Your Google Sheet ID
         const sheetID = "2PACX-1vRn-3l2VVf_BLY3KLVHo1h0GrRQeteJyjYtNAJK89itdS8Yu9MJLFb5EHStL66975oYhS7LkxFqU-94";
         const csvUrl = `https://docs.google.com/spreadsheets/d/e/${sheetID}/pub?output=csv`;
 
-        // डेटा फेच करणे
+        // --- FETCH DATA ---
         Papa.parse(csvUrl, {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
+            download: true, header: true, skipEmptyLines: true,
             complete: function(results) {
-                const data = results.data;
-                console.log("Data Loaded:", data); // Debugging
-                processData(data);
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-            },
-            error: function(err) {
-                alert("डेटा लोड करण्यात त्रुटी आली. कृपया इंटरनेट तपासा.");
-                console.error(err);
+                try {
+                    processData(results.data);
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+                } catch (e) {
+                    console.error(e);
+                    alert("डेटा वाचताना त्रुटी आली. कृपया कन्सोल तपासा.");
+                }
             }
         });
 
+        // --- DATA PROCESSING LOGIC ---
         function processData(data) {
-            // --- 1. गणना (Calculations) ---
-            const total = data.length;
-            
-            // Income Cleaning & Average
+            // Counters and Aggregators
+            let total = data.length;
             let totalIncome = 0;
+            let totalPotentialSaving = 0;
             let incomeCount = 0;
             
-            // Smartphone Count
-            let smartPhoneCount = 0;
+            let counts = {
+                services: {},
+                methods: {},
+                frequency: {},
+                gender: {'महिला': 0, 'पुरुष': 0},
+                occupation: {},
+                surveyor: {},
+                village: {},
+                amountRange: {'< 500':0, '500-1000':0, '1000-2000':0, '> 2000':0}
+            };
 
-            // Categories Counters
-            let villages = {};
-            let savingMethods = {};
-            let services = {};
-            let genders = {'महिला': 0, 'पुरुष': 0};
-            let loanInterested = 0;
+            let tech = {
+                smartphone: 0,
+                upi: 0,
+                comfort: 0
+            };
+
+            let loanCount = 0;
+
+            const tbody = document.querySelector('#feedbackTable tbody');
 
             data.forEach(row => {
-                // Income
-                let inc = parseInt(row['monthlyIncome']);
-                if (!isNaN(inc)) { totalIncome += inc; incomeCount++; }
+                // 1. Cleaning & Parsing
+                const income = parseInt(row.monthlyIncome) || 0;
+                const saveAmt = parseInt(row.savingAmount) || 0;
+                
+                if(income > 0) { totalIncome += income; incomeCount++; }
+                totalPotentialSaving += saveAmt;
 
-                // Smartphone (Checking "होय" or "Yes")
-                if (row['hasSmartphone'] && (row['hasSmartphone'].includes('होय') || row['hasSmartphone'].toLowerCase().includes('yes'))) {
-                    smartPhoneCount++;
-                }
+                // 2. Tech Stats (Normalize 'Yes', 'Ho', 'Hoy')
+                const isYes = (val) => val && (val.toLowerCase().includes('ho') || val.toLowerCase().includes('yes'));
+                
+                if(isYes(row.hasSmartphone)) tech.smartphone++;
+                if(isYes(row.usesUpi)) tech.upi++;
+                if(isYes(row.onlinePaymentComfort)) tech.comfort++;
 
-                // Villages
-                let v = row['village'] || 'Other';
-                if(v.includes('Lohata')) v = 'Lohata Purv'; // Spelling normalization
-                villages[v] = (villages[v] || 0) + 1;
-
-                // Saving Methods
-                let method = row['savingMethods'] || 'None';
-                savingMethods[method] = (savingMethods[method] || 0) + 1;
-
-                // Services Interest
-                let srv = row['interestedServices'] || 'None';
-                services[srv] = (services[srv] || 0) + 1;
-                if(srv.includes('कर्ज')) loanInterested++;
+                // 3. Categorical Counts
+                countItem(counts.services, row.interestedServices);
+                countItem(counts.methods, row.savingMethods);
+                countItem(counts.frequency, row.savingFrequency);
+                countItem(counts.occupation, row.occupation);
+                countItem(counts.surveyor, row.surveyorName);
+                
+                // Village Normalization
+                let v = row.village ? row.village.trim() : "Other";
+                if(v.toLowerCase().includes('lohata')) v = "Lohata Purv";
+                if(v.toLowerCase().includes('nagzar')) v = "Nagzarwadi";
+                counts.village[v] = (counts.village[v] || 0) + 1;
 
                 // Gender
-                let g = row['gender'];
-                if (g && (g === 'महिला' || g.toLowerCase() === 'female')) genders['महिला']++;
-                else if (g) genders['पुरुष']++;
-            });
+                let g = row.gender ? row.gender.trim() : "";
+                if(g === 'महिला' || g.toLowerCase() === 'female') counts.gender['महिला']++;
+                else if(g) counts.gender['पुरुष']++;
 
-            // --- 2. Update KPIs ---
-            document.getElementById('totalSurveys').innerText = total;
-            document.getElementById('avgIncome').innerText = incomeCount > 0 ? Math.round(totalIncome / incomeCount).toLocaleString('en-IN') : 0;
-            document.getElementById('smartphoneUsers').innerText = total > 0 ? Math.round((smartPhoneCount / total) * 100) + "%" : "0%";
-            document.getElementById('loanInterest').innerText = loanInterested;
+                // Loan Interest
+                if(row.interestedServices && row.interestedServices.includes('कर्ज')) loanCount++;
 
-            // --- 3. Update Charts ---
-            renderChart('villageChart', 'pie', Object.keys(villages), Object.values(villages), ['#3b82f6', '#f59e0b', '#10b981']);
-            renderChart('savingMethodChart', 'doughnut', Object.keys(savingMethods), Object.values(savingMethods), ['#8b5cf6', '#ec4899', '#6366f1', '#14b8a6']);
-            renderChart('servicesChart', 'bar', Object.keys(services), Object.values(services), '#2563eb');
-            renderChart('genderChart', 'doughnut', ['महिला', 'पुरुष'], [genders['महिला'], genders['पुरुष']], ['#ec4899', '#3b82f6']);
+                // Amount Ranges
+                if(saveAmt < 500) counts.amountRange['< 500']++;
+                else if(saveAmt <= 1000) counts.amountRange['500-1000']++;
+                else if(saveAmt <= 2000) counts.amountRange['1000-2000']++;
+                else counts.amountRange['> 2000']++;
 
-            // --- 4. Update Table (Only shows rows with suggestions) ---
-            const tableBody = document.querySelector('#feedbackTable tbody');
-            data.forEach(row => {
-                if (row['suggestions'] && row['suggestions'].trim().length > 2) {
+                // 4. Table Population (Suggestions)
+                if(row.suggestions || row.personName) {
                     const tr = document.createElement('tr');
-                    // Getting date part only
-                    let dateStr = row['Timestamp'] ? row['Timestamp'].split(' ')[0] : '-';
+                    const date = row.Timestamp ? row.Timestamp.split(' ')[0] : '';
+                    const suggestionText = row.suggestions ? row.suggestions : '<span style="color:#ccc">सूचना नाही</span>';
                     tr.innerHTML = `
-                        <td>${dateStr}</td>
-                        <td><strong>${row['personName']}</strong></td>
-                        <td>${row['village']}</td>
-                        <td>${row['suggestions']}</td>
+                        <td>${date}</td>
+                        <td style="font-weight:600">${row.personName}</td>
+                        <td>${v}</td>
+                        <td>${row.mobileNumber}</td>
+                        <td>${row.occupation}</td>
+                        <td>${suggestionText}</td>
                     `;
-                    tableBody.appendChild(tr);
+                    tbody.appendChild(tr);
                 }
             });
+
+            // --- UPDATE UI ---
+            // KPIs
+            document.getElementById('kpiTotal').innerText = total;
+            document.getElementById('kpiIncome').innerText = Math.round(totalIncome / (incomeCount || 1)).toLocaleString('en-IN');
+            document.getElementById('kpiSavingPot').innerText = totalPotentialSaving.toLocaleString('en-IN');
+            document.getElementById('kpiLoan').innerText = loanCount;
+            document.getElementById('kpiDigital').innerText = Math.round((tech.smartphone / total) * 100) + "%";
+
+            // Progress Bars
+            updateProgress('barPhone', 'txtPhone', tech.smartphone, total);
+            updateProgress('barUpi', 'txtUpi', tech.upi, total);
+            updateProgress('barComfort', 'txtComfort', tech.comfort, total);
+
+            // --- RENDER CHARTS ---
+            
+            // 1. Services (Bar)
+            createChart('servicesChart', 'bar', counts.services, 'संख्या', ['#0078d4']);
+
+            // 2. Methods (Doughnut)
+            createChart('methodChart', 'doughnut', counts.methods, 'संख्या', ['#0078d4', '#107c10', '#ffaa00', '#d13438']);
+
+            // 3. Frequency (Pie)
+            createChart('freqChart', 'pie', counts.frequency, 'संख्या', ['#5c2d91', '#008272', '#d83b01']);
+
+            // 4. Gender (Small Doughnut)
+            new Chart(document.getElementById('genderChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['महिला', 'पुरुष'],
+                    datasets: [{ data: [counts.gender['महिला'], counts.gender['पुरुष']], backgroundColor: ['#e3008c', '#0078d4'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+            });
+
+            // 5. Occupation (Horizontal Bar)
+            new Chart(document.getElementById('occupChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(counts.occupation),
+                    datasets: [{ label: 'व्यक्ती', data: Object.values(counts.occupation), backgroundColor: '#2b88d8' }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+            });
+
+            // 6. Surveyor (Bar)
+            createChart('surveyorChart', 'bar', counts.surveyor, 'सर्वेक्षण', ['#107c10']);
+
+            // 7. Village (Pie)
+            createChart('villageChart', 'pie', counts.village, 'लोकसंख्या', ['#ffaa00', '#0078d4', '#5c2d91']);
+
+            // 8. Amount Range (Bar)
+            createChart('amountChart', 'bar', counts.amountRange, 'व्यक्ती', ['#5c2d91']);
         }
 
-        // Chart Rendering Helper Function
-        function renderChart(canvasId, type, labels, data, colors) {
-            new Chart(document.getElementById(canvasId), {
+        // --- HELPERS ---
+        function countItem(obj, key) {
+            if(!key) return;
+            key = key.trim();
+            obj[key] = (obj[key] || 0) + 1;
+        }
+
+        function updateProgress(barId, txtId, val, total) {
+            const pct = Math.round((val / total) * 100);
+            document.getElementById(barId).style.width = pct + "%";
+            document.getElementById(txtId).innerText = pct + "%";
+        }
+
+        function createChart(id, type, dataObj, label, colors) {
+            // Sort data for better visuals if it's an object
+            const labels = Object.keys(dataObj);
+            const values = Object.values(dataObj);
+            
+            // Generate random colors if not enough provided
+            let bgColors = colors;
+            if(colors.length === 1 && (type === 'pie' || type === 'doughnut')) {
+                bgColors = labels.map(() => `hsl(${Math.random() * 360}, 70%, 50%)`);
+            } else if (colors.length === 1) {
+                // For bar charts, same color is fine
+                bgColors = colors[0];
+            }
+
+            new Chart(document.getElementById(id), {
                 type: type,
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'संख्या',
-                        data: data,
-                        backgroundColor: colors,
+                        label: label,
+                        data: values,
+                        backgroundColor: bgColors,
                         borderWidth: 1
                     }]
                 },
@@ -338,8 +511,12 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom' }
-                    }
+                        legend: {
+                            display: (type === 'pie' || type === 'doughnut'),
+                            position: 'bottom'
+                        }
+                    },
+                    scales: (type === 'bar' || type === 'line') ? { y: { beginAtZero: true } } : {}
                 }
             });
         }
