@@ -19,7 +19,7 @@
         :root {
             --bg-color: #f0f2f5;
             --card-bg: #ffffff;
-            --primary: #0078d4; /* PowerBI Blue */
+            --primary: #0078d4;
             --secondary: #2b88d8;
             --text-dark: #252423;
             --text-light: #605e5c;
@@ -27,6 +27,7 @@
             --warning: #d13438;
             --purple: #5c2d91;
             --teal: #008272;
+            --orange: #da3b01;
         }
 
         body {
@@ -63,7 +64,7 @@
         /* Main Container */
         .container { padding: 20px; max-width: 1400px; margin: 0 auto; }
 
-        /* KPI Section (Top Row) */
+        /* KPI Section */
         .kpi-row {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px; margin-bottom: 20px;
@@ -78,20 +79,18 @@
         .kpi-value { font-size: 2rem; font-weight: 700; color: var(--text-dark); }
         .kpi-sub { font-size: 0.8rem; color: var(--success); margin-top: 5px; }
 
-        /* Color Coding KPIs */
         .k-blue { border-bottom-color: var(--primary); }
         .k-green { border-bottom-color: var(--success); }
         .k-purple { border-bottom-color: var(--purple); }
         .k-teal { border-bottom-color: var(--teal); }
         .k-red { border-bottom-color: var(--warning); }
 
-        /* Grid Layout for Charts */
+        /* Grid Layout */
         .dashboard-grid {
             display: grid; grid-template-columns: repeat(12, 1fr);
             gap: 20px; margin-bottom: 20px;
         }
 
-        /* Generic Card Style */
         .chart-card {
             background: var(--card-bg); border-radius: 4px; padding: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -103,21 +102,19 @@
             display: flex; justify-content: space-between;
         }
 
-        /* Specific Sizes */
-        .col-3 { grid-column: span 3; }
         .col-4 { grid-column: span 4; }
         .col-6 { grid-column: span 6; }
         .col-8 { grid-column: span 8; }
         .col-12 { grid-column: span 12; }
 
-        .chart-container { position: relative; height: 280px; width: 100%; }
-        .small-chart { height: 200px; }
+        .chart-container { position: relative; height: 300px; width: 100%; }
+        .small-chart { height: 180px; }
 
-        /* Custom Progress Bars (For Digital Literacy) */
-        .progress-item { margin-bottom: 15px; }
-        .progress-label { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
-        .progress-bg { height: 10px; background: #e1dfdd; border-radius: 5px; overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 5px; transition: width 1s ease-in-out; }
+        /* Progress Bars */
+        .progress-item { margin-bottom: 20px; }
+        .progress-label { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.95rem; font-weight: 500; }
+        .progress-bg { height: 12px; background: #e1dfdd; border-radius: 6px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 6px; transition: width 1s ease-in-out; }
 
         /* Table */
         .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -125,13 +122,8 @@
         .data-table td { border-bottom: 1px solid #e1dfdd; padding: 8px 10px; }
         .table-scroll { max-height: 400px; overflow-y: auto; }
 
-        /* Responsive */
         @media (max-width: 1024px) {
-            .col-3, .col-4, .col-6, .col-8 { grid-column: span 12; }
-        }
-        @media (max-width: 768px) {
-            .kpi-row { grid-template-columns: 1fr 1fr; }
-            .app-title { font-size: 1.1rem; }
+            .col-4, .col-6, .col-8 { grid-column: span 12; }
         }
     </style>
 </head>
@@ -152,12 +144,12 @@
 
     <div class="container" id="mainContent" style="display:none;">
         
-        <!-- ROW 1: High Level KPIs -->
+        <!-- ROW 1: KPIs -->
         <div class="kpi-row">
             <div class="kpi-card k-blue">
                 <div class="kpi-label">एकूण सर्वेक्षण (Total Surveys)</div>
                 <div class="kpi-value" id="kpiTotal">0</div>
-                <div class="kpi-sub"><i class="fas fa-user-check"></i> यशस्वी नोंदी</div>
+                <div class="kpi-sub"><i class="fas fa-check-circle"></i> यशस्वी नोंदी</div>
             </div>
             <div class="kpi-card k-green">
                 <div class="kpi-label">सरासरी मासिक उत्पन्न (Avg Income)</div>
@@ -165,9 +157,9 @@
                 <div class="kpi-sub">प्रति कुटुंब</div>
             </div>
             <div class="kpi-card k-purple">
-                <div class="kpi-label">संभाव्य मासिक बचत (Potential Saving)</div>
+                <div class="kpi-label">संभाव्य मासिक बचत (Total Saving)</div>
                 <div class="kpi-value">₹<span id="kpiSavingPot">0</span></div>
-                <div class="kpi-sub">एकूण जमा रक्कम (अंदाजित)</div>
+                <div class="kpi-sub">गावाची एकूण क्षमता</div>
             </div>
             <div class="kpi-card k-teal">
                 <div class="kpi-label">डिजिटल साक्षरता (Digital Users)</div>
@@ -181,32 +173,22 @@
             </div>
         </div>
 
-        <!-- ROW 2: Demographics & Financial Interest -->
+        <!-- ROW 2: Services & Savings -->
         <div class="dashboard-grid">
-            <!-- Services Interest -->
-            <div class="chart-card col-6">
+            <!-- Interested Services -->
+            <div class="chart-card col-8">
                 <div class="card-header">
-                    <span><i class="fas fa-bullseye"></i> लोकांचा कल (Interested Services)</span>
+                    <span><i class="fas fa-hand-holding-usd"></i> लोकांना हव्या असलेल्या सुविधा (Interested Services)</span>
                 </div>
                 <div class="chart-container">
                     <canvas id="servicesChart"></canvas>
                 </div>
             </div>
 
-            <!-- Savings Method Preference -->
-            <div class="chart-card col-3">
-                <div class="card-header">
-                    <span><i class="fas fa-piggy-bank"></i> बचतीची पद्धत</span>
-                </div>
-                <div class="chart-container">
-                    <canvas id="methodChart"></canvas>
-                </div>
-            </div>
-
             <!-- Saving Frequency -->
-            <div class="chart-card col-3">
+            <div class="chart-card col-4">
                 <div class="card-header">
-                    <span><i class="fas fa-clock"></i> बचतीची वारंवारता</span>
+                    <span><i class="fas fa-history"></i> बचतीची वारंवारता (Frequency)</span>
                 </div>
                 <div class="chart-container">
                     <canvas id="freqChart"></canvas>
@@ -214,34 +196,38 @@
             </div>
         </div>
 
-        <!-- ROW 3: Detailed Breakdown -->
+        <!-- ROW 3: Digital & Occupation (Surveyor Removed) -->
         <div class="dashboard-grid">
-            <!-- Digital Literacy Bars -->
-            <div class="chart-card col-4">
+            <!-- Digital Stats -->
+            <div class="chart-card col-6">
                 <div class="card-header">
-                    <span><i class="fas fa-mobile-alt"></i> डिजिटल तयारी (Digital Readiness)</span>
+                    <span><i class="fas fa-mobile-alt"></i> डिजिटल तयारी आणि पेमेंट (Digital Readiness)</span>
                 </div>
-                <div style="padding: 20px 0;">
+                <div style="padding: 20px;">
                     <div class="progress-item">
                         <div class="progress-label"><span>स्मार्टफोन आहे (Has Smartphone)</span><span id="txtPhone">0%</span></div>
                         <div class="progress-bg"><div class="progress-fill" id="barPhone" style="width:0%; background:#0078d4;"></div></div>
                     </div>
                     <div class="progress-item">
-                        <div class="progress-label"><span>UPI वापरतात (Uses UPI)</span><span id="txtUpi">0%</span></div>
+                        <div class="progress-label"><span>UPI / फोन-पे वापरतात (Uses UPI)</span><span id="txtUpi">0%</span></div>
                         <div class="progress-bg"><div class="progress-fill" id="barUpi" style="width:0%; background:#107c10;"></div></div>
                     </div>
                     <div class="progress-item">
-                        <div class="progress-label"><span>ऑनलाईन पेमेंटला कम्फर्ट (Online Comfort)</span><span id="txtComfort">0%</span></div>
+                        <div class="progress-label"><span>ऑनलाईन पेमेंटला कम्फर्ट (Comfortable with Online)</span><span id="txtComfort">0%</span></div>
                         <div class="progress-bg"><div class="progress-fill" id="barComfort" style="width:0%; background:#5c2d91;"></div></div>
                     </div>
                 </div>
-                <div class="chart-container small-chart">
-                    <canvas id="genderChart"></canvas> <!-- Putting Gender here to save space -->
+                <!-- Small Gender Chart inserted here to save space -->
+                <div style="border-top: 1px solid #eee; padding-top: 10px;">
+                    <div class="progress-label" style="justify-content:center;">लिंग गुणोत्तर (Gender Ratio)</div>
+                    <div class="chart-container small-chart">
+                        <canvas id="genderChart"></canvas>
+                    </div>
                 </div>
             </div>
 
-            <!-- Occupation Breakdown -->
-            <div class="chart-card col-4">
+            <!-- Occupation -->
+            <div class="chart-card col-6">
                 <div class="card-header">
                     <span><i class="fas fa-briefcase"></i> व्यवसाय (Occupation)</span>
                 </div>
@@ -249,20 +235,20 @@
                     <canvas id="occupChart"></canvas>
                 </div>
             </div>
-
-            <!-- Surveyor Performance -->
-            <div class="chart-card col-4">
-                <div class="card-header">
-                    <span><i class="fas fa-users-cog"></i> सर्व्हेअर कामगिरी (Surveyor Stats)</span>
-                </div>
-                <div class="chart-container">
-                    <canvas id="surveyorChart"></canvas>
-                </div>
-            </div>
         </div>
 
-        <!-- ROW 4: Village & Family Stats -->
+        <!-- ROW 4: Savings Amount & Village -->
         <div class="dashboard-grid">
+             <div class="chart-card col-6">
+                 <div class="card-header">
+                    <span><i class="fas fa-wallet"></i> बचतीची क्षमता (Willingness to Save - Amount)</span>
+                </div>
+                <div class="chart-container">
+                    <!-- Changed to Doughnut for better visual -->
+                    <canvas id="amountChart"></canvas>
+                </div>
+            </div>
+
              <div class="chart-card col-6">
                 <div class="card-header">
                     <span><i class="fas fa-map-marker-alt"></i> गावनिहाय वितरण (Village Wise)</span>
@@ -271,21 +257,12 @@
                     <canvas id="villageChart"></canvas>
                 </div>
             </div>
-            
-            <div class="chart-card col-6">
-                 <div class="card-header">
-                    <span><i class="fas fa-rupee-sign"></i> बचतीची क्षमता (Willingness to Save Amount)</span>
-                </div>
-                <div class="chart-container">
-                    <canvas id="amountChart"></canvas>
-                </div>
-            </div>
         </div>
 
-        <!-- ROW 5: Data Table & Suggestions -->
+        <!-- ROW 5: Data Table -->
         <div class="chart-card col-12">
             <div class="card-header">
-                <span><i class="fas fa-comment-dots"></i> महत्त्वाच्या प्रतिक्रिया आणि सूचना (Feedback & Suggestions)</span>
+                <span><i class="fas fa-comments"></i> लोकांच्या प्रतिक्रिया आणि सूचना (Feedback)</span>
             </div>
             <div class="table-scroll">
                 <table class="data-table" id="feedbackTable">
@@ -296,7 +273,7 @@
                             <th>गाव</th>
                             <th>फोन</th>
                             <th>व्यवसाय</th>
-                            <th>सूचना/प्रतिक्रिया (Feedback)</th>
+                            <th>सूचना (Feedback)</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -312,6 +289,28 @@
         const sheetID = "2PACX-1vRn-3l2VVf_BLY3KLVHo1h0GrRQeteJyjYtNAJK89itdS8Yu9MJLFb5EHStL66975oYhS7LkxFqU-94";
         const csvUrl = `https://docs.google.com/spreadsheets/d/e/${sheetID}/pub?output=csv`;
 
+        // Translation Map for Chart Labels
+        const dictionary = {
+            "Daily": "दैनिक (Daily)",
+            "Weekly": "साप्ताहिक (Weekly)",
+            "Monthly": "मासिक (Monthly)",
+            "Yearly": "वार्षिक (Yearly)",
+            "Farmer": "शेतकरी",
+            "Student": "विद्यार्थी",
+            "Business": "व्यवसाय",
+            "Job": "नोकरी",
+            "Housewife": "गृहिणी",
+            "Other": "इतर",
+            "Male": "पुरुष",
+            "Female": "महिला"
+        };
+
+        const translate = (text) => {
+            if(!text) return text;
+            const t = text.trim();
+            return dictionary[t] || t;
+        };
+
         // --- FETCH DATA ---
         Papa.parse(csvUrl, {
             download: true, header: true, skipEmptyLines: true,
@@ -322,14 +321,13 @@
                     document.getElementById('mainContent').style.display = 'block';
                 } catch (e) {
                     console.error(e);
-                    alert("डेटा वाचताना त्रुटी आली. कृपया कन्सोल तपासा.");
+                    alert("Error processing data.");
                 }
             }
         });
 
-        // --- DATA PROCESSING LOGIC ---
+        // --- DATA LOGIC ---
         function processData(data) {
-            // Counters and Aggregators
             let total = data.length;
             let totalIncome = 0;
             let totalPotentialSaving = 0;
@@ -337,109 +335,118 @@
             
             let counts = {
                 services: {},
-                methods: {},
                 frequency: {},
                 gender: {'महिला': 0, 'पुरुष': 0},
                 occupation: {},
-                surveyor: {},
                 village: {},
                 amountRange: {'< 500':0, '500-1000':0, '1000-2000':0, '> 2000':0}
             };
 
-            let tech = {
-                smartphone: 0,
-                upi: 0,
-                comfort: 0
-            };
-
+            let tech = { smartphone: 0, upi: 0, comfort: 0 };
             let loanCount = 0;
-
             const tbody = document.querySelector('#feedbackTable tbody');
 
+            // Robust "Yes" Checker for Marathi/English
+            const isYes = (val) => {
+                if(!val) return false;
+                const v = val.toString().toLowerCase().trim();
+                return v.includes('yes') || v.includes('ho') || v === 'हो' || v === 'होय' || v === 'haan';
+            };
+
             data.forEach(row => {
-                // 1. Cleaning & Parsing
+                // Financials
                 const income = parseInt(row.monthlyIncome) || 0;
                 const saveAmt = parseInt(row.savingAmount) || 0;
                 
                 if(income > 0) { totalIncome += income; incomeCount++; }
                 totalPotentialSaving += saveAmt;
 
-                // 2. Tech Stats (Normalize 'Yes', 'Ho', 'Hoy')
-                const isYes = (val) => val && (val.toLowerCase().includes('ho') || val.toLowerCase().includes('yes'));
-                
+                // Digital Stats (Using fixed logic)
                 if(isYes(row.hasSmartphone)) tech.smartphone++;
                 if(isYes(row.usesUpi)) tech.upi++;
                 if(isYes(row.onlinePaymentComfort)) tech.comfort++;
 
-                // 3. Categorical Counts
-                countItem(counts.services, row.interestedServices);
-                countItem(counts.methods, row.savingMethods);
-                countItem(counts.frequency, row.savingFrequency);
-                countItem(counts.occupation, row.occupation);
-                countItem(counts.surveyor, row.surveyorName);
+                // Services (Split by comma if multiple selected)
+                if(row.interestedServices) {
+                    row.interestedServices.split(',').forEach(s => {
+                        let service = s.trim();
+                        if(service) countItem(counts.services, service);
+                        if(service.includes('Loan') || service.includes('कर्ज')) loanCount++; // Double check loan logic
+                    });
+                }
                 
-                // Village Normalization
+                // Frequency
+                countItem(counts.frequency, translate(row.savingFrequency));
+
+                // Occupation
+                countItem(counts.occupation, translate(row.occupation));
+                
+                // Village
                 let v = row.village ? row.village.trim() : "Other";
-                if(v.toLowerCase().includes('lohata')) v = "Lohata Purv";
-                if(v.toLowerCase().includes('nagzar')) v = "Nagzarwadi";
-                counts.village[v] = (counts.village[v] || 0) + 1;
+                // Normalize names if needed
+                if(v.toLowerCase().includes('lohata')) v = "Lohata";
+                countItem(counts.village, v);
 
                 // Gender
                 let g = row.gender ? row.gender.trim() : "";
                 if(g === 'महिला' || g.toLowerCase() === 'female') counts.gender['महिला']++;
                 else if(g) counts.gender['पुरुष']++;
 
-                // Loan Interest
-                if(row.interestedServices && row.interestedServices.includes('कर्ज')) loanCount++;
-
                 // Amount Ranges
-                if(saveAmt < 500) counts.amountRange['< 500']++;
-                else if(saveAmt <= 1000) counts.amountRange['500-1000']++;
-                else if(saveAmt <= 2000) counts.amountRange['1000-2000']++;
-                else counts.amountRange['> 2000']++;
+                if(saveAmt > 0 && saveAmt < 500) counts.amountRange['< 500']++;
+                else if(saveAmt >= 500 && saveAmt <= 1000) counts.amountRange['500-1000']++;
+                else if(saveAmt > 1000 && saveAmt <= 2000) counts.amountRange['1000-2000']++;
+                else if(saveAmt > 2000) counts.amountRange['> 2000']++;
 
-                // 4. Table Population (Suggestions)
+                // Feedback Table
                 if(row.suggestions || row.personName) {
                     const tr = document.createElement('tr');
                     const date = row.Timestamp ? row.Timestamp.split(' ')[0] : '';
-                    const suggestionText = row.suggestions ? row.suggestions : '<span style="color:#ccc">सूचना नाही</span>';
+                    const suggestionText = row.suggestions ? row.suggestions : '<span style="color:#ccc">-</span>';
                     tr.innerHTML = `
                         <td>${date}</td>
                         <td style="font-weight:600">${row.personName}</td>
                         <td>${v}</td>
                         <td>${row.mobileNumber}</td>
-                        <td>${row.occupation}</td>
+                        <td>${translate(row.occupation)}</td>
                         <td>${suggestionText}</td>
                     `;
                     tbody.appendChild(tr);
                 }
             });
 
-            // --- UPDATE UI ---
-            // KPIs
+            // --- UPDATE KPIS ---
             document.getElementById('kpiTotal').innerText = total;
             document.getElementById('kpiIncome').innerText = Math.round(totalIncome / (incomeCount || 1)).toLocaleString('en-IN');
             document.getElementById('kpiSavingPot').innerText = totalPotentialSaving.toLocaleString('en-IN');
-            document.getElementById('kpiLoan').innerText = loanCount;
+            document.getElementById('kpiLoan').innerText = loanCount; // Shows unique interest in Loan service
             document.getElementById('kpiDigital').innerText = Math.round((tech.smartphone / total) * 100) + "%";
 
-            // Progress Bars
+            // Update Progress Bars
             updateProgress('barPhone', 'txtPhone', tech.smartphone, total);
             updateProgress('barUpi', 'txtUpi', tech.upi, total);
             updateProgress('barComfort', 'txtComfort', tech.comfort, total);
 
             // --- RENDER CHARTS ---
             
-            // 1. Services (Bar)
-            createChart('servicesChart', 'bar', counts.services, 'संख्या', ['#0078d4']);
+            // 1. Services (Horizontal Bar for better readability of names)
+            new Chart(document.getElementById('servicesChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(counts.services),
+                    datasets: [{ 
+                        label: 'स्वारस्य (Interest)', 
+                        data: Object.values(counts.services), 
+                        backgroundColor: '#0078d4' 
+                    }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+            });
 
-            // 2. Methods (Doughnut)
-            createChart('methodChart', 'doughnut', counts.methods, 'संख्या', ['#0078d4', '#107c10', '#ffaa00', '#d13438']);
+            // 2. Frequency (Pie)
+            createChart('freqChart', 'pie', counts.frequency, 'Users', ['#5c2d91', '#008272', '#d83b01', '#ffaa00']);
 
-            // 3. Frequency (Pie)
-            createChart('freqChart', 'pie', counts.frequency, 'संख्या', ['#5c2d91', '#008272', '#d83b01']);
-
-            // 4. Gender (Small Doughnut)
+            // 3. Gender (Small Doughnut)
             new Chart(document.getElementById('genderChart'), {
                 type: 'doughnut',
                 data: {
@@ -449,27 +456,27 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
             });
 
-            // 5. Occupation (Horizontal Bar)
-            new Chart(document.getElementById('occupChart'), {
-                type: 'bar',
+            // 4. Occupation (Bar)
+            createChart('occupChart', 'bar', counts.occupation, 'व्यक्ती', ['#2b88d8']);
+
+            // 5. Amount Range (Doughnut - Requested Change)
+            new Chart(document.getElementById('amountChart'), {
+                type: 'doughnut',
                 data: {
-                    labels: Object.keys(counts.occupation),
-                    datasets: [{ label: 'व्यक्ती', data: Object.values(counts.occupation), backgroundColor: '#2b88d8' }]
+                    labels: ['500 पेक्षा कमी', '500 ते 1000', '1000 ते 2000', '2000 पेक्षा जास्त'],
+                    datasets: [{ 
+                        data: Object.values(counts.amountRange),
+                        backgroundColor: ['#ffaa44', '#107c10', '#0078d4', '#5c2d91'] 
+                    }]
                 },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
 
-            // 6. Surveyor (Bar)
-            createChart('surveyorChart', 'bar', counts.surveyor, 'सर्वेक्षण', ['#107c10']);
-
-            // 7. Village (Pie)
-            createChart('villageChart', 'pie', counts.village, 'लोकसंख्या', ['#ffaa00', '#0078d4', '#5c2d91']);
-
-            // 8. Amount Range (Bar)
-            createChart('amountChart', 'bar', counts.amountRange, 'व्यक्ती', ['#5c2d91']);
+            // 6. Village (Pie)
+            createChart('villageChart', 'pie', counts.village, 'लोकसंख्या', []);
         }
 
-        // --- HELPERS ---
+        // Helpers
         function countItem(obj, key) {
             if(!key) return;
             key = key.trim();
@@ -477,22 +484,20 @@
         }
 
         function updateProgress(barId, txtId, val, total) {
-            const pct = Math.round((val / total) * 100);
+            const pct = total > 0 ? Math.round((val / total) * 100) : 0;
             document.getElementById(barId).style.width = pct + "%";
             document.getElementById(txtId).innerText = pct + "%";
         }
 
         function createChart(id, type, dataObj, label, colors) {
-            // Sort data for better visuals if it's an object
             const labels = Object.keys(dataObj);
             const values = Object.values(dataObj);
             
-            // Generate random colors if not enough provided
             let bgColors = colors;
-            if(colors.length === 1 && (type === 'pie' || type === 'doughnut')) {
+            if(colors.length === 0) {
+                 // Generate random colors if none provided
                 bgColors = labels.map(() => `hsl(${Math.random() * 360}, 70%, 50%)`);
             } else if (colors.length === 1) {
-                // For bar charts, same color is fine
                 bgColors = colors[0];
             }
 
@@ -516,7 +521,7 @@
                             position: 'bottom'
                         }
                     },
-                    scales: (type === 'bar' || type === 'line') ? { y: { beginAtZero: true } } : {}
+                    scales: (type === 'bar') ? { y: { beginAtZero: true } } : {}
                 }
             });
         }
