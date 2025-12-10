@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIGMI Job Recruitment Dashboard - A Tool by Umesh</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #4a148c; /* Purple */
+            --secondary-color: #d84315; /* Orange */
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            color: var(--text-dark);
+        }
+
+        /* Header Section */
+        header {
+            background: linear-gradient(135deg, #fff 0%, #fdfdfd 100%);
+            padding: 15px 30px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            border-bottom: 4px solid var(--secondary-color);
+        }
+
+        .logo-container img {
+            height: 80px;
+            margin-right: 20px;
+        }
+
+        .header-text h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+
+        .header-text h2 {
+            margin: 5px 0 0;
+            font-size: 1rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .header-text span {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+        }
+
+        .header-right {
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .refresh-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background-color: #38006b;
+        }
+
+        /* Main Dashboard Grid */
+        .container {
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Filter Status Bar */
+        #filter-status {
+            background-color: #e0f2f1;
+            color: #00695c;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none; /* Hidden by default */
+            font-weight: bold;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #b2dfdb;
+        }
+        .clear-filter-btn {
+            background: none;
+            border: none;
+            color: #d32f2f;
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            border-left: 5px solid var(--primary-color);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .kpi-card::after {
+            content: 'Click to Filter';
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 0.6rem;
+            color: #ccc;
+            text-transform: uppercase;
+        }
+
+        .kpi-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-right: 15px;
+            opacity: 0.8;
+        }
+
+        .kpi-info h3 {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+        }
+
+        .kpi-info p {
+            margin: 5px 0 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            height: 350px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .chart-container:hover {
+            transform: scale(1.01);
+            border: 1px solid var(--primary-color);
+        }
+
+        .chart-title {
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .chart-hint {
+            font-size: 0.7rem;
+            color: #999;
+            font-weight: normal;
+        }
+
+        /* Table Section */
+        .table-container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-high { background-color: #d1fae5; color: #065f46; } /* Green */
+        .badge-med { background-color: #fef3c7; color: #92400e; } /* Orange */
+        .badge-low { background-color: #fee2e2; color: #b91c1c; } /* Red */
+
+        .score-display {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .score-bar-bg {
+            width: 50px;
+            height: 6px;
+            background: #eee;
+            margin-left: 10px;
+            border-radius: 3px;
+        }
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        /* Loading Spinner */
+        #loading {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+        }
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loading">
+        <div class="spinner"></div>
+        <h3>Analysing Data with Smart Logic...</h3>
+        <p>Fetching Live Responses</p>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="logo-container">
+            <img src="https://i.ibb.co/2h1vD4q/logo.jpg" alt="Lokparyay Logo" onerror="this.src='https://via.placeholder.com/100x100?text=LOGO'">
+        </div>
+        <div class="header-text">
+            <h1>लोकपर्याय डिस्ट्रिक्ट को-ऑपरेटिव्ह क्रेडिट सोसायटी लि.</h1>
+            <h2>PIGMI Job Recruitment Dashboard</h2>
+            <span>A Tool by Umesh</span>
+        </div>
+        <div class="header-right">
+            <button class="refresh-btn" onclick="fetchData()"><i class="fas fa-sync-alt"></i> Refresh Data</button>
+            <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Updated: <span id="last-updated">Now</span></p>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <!-- Active Filter Indicator -->
+        <div id="filter-status">
+            <span>Filtering by: <span id="filter-name">None</span></span>
+            <button class="clear-filter-btn" onclick="resetFilters()">Clear Filter</button>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card" style="border-color: #4a148c;" onclick="resetFilters()">
+                <div class="kpi-icon"><i class="fas fa-users"></i></div>
+                <div class="kpi-info">
+                    <h3>Total Candidates</h3>
+                    <p id="total-candidates">0</p>
+                </div>
+            </div>
+            <div class="kpi-card" style="border-color: #10b981;" onclick="applyFilter('top')">
+                <div class="kpi-icon" style="color:#10b981"><i class="fas fa-star"></i></div>
+                <div class="kpi-info">
+                    <h3>Top Scored</h3>
+                    <p id="top-rated">0</p>
+                </div>
+            </div>
+            <div class="kpi-card" style="border-color: #f59e0b;" onclick="applyFilter('bike')">
+                <div class="kpi-icon" style="color:#f59e0b"><i class="fas fa-motorcycle"></i></div>
+                <div class="kpi-info">
+                    <h3>Bike & Lic. Ready</h3>
+                    <p id="bike-ready">0%</p>
+                </div>
+            </div>
+            <div class="kpi-card" style="border-color: #2563eb;" onclick="applyFilter('exp')">
+                <div class="kpi-icon" style="color:#2563eb"><i class="fas fa-briefcase"></i></div>
+                <div class="kpi-info">
+                    <h3>Experienced</h3>
+                    <p id="experienced-count">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-container" onclick="applyFilter('top')">
+                <div class="chart-title">
+                    Candidate Fit Analysis
+                    <span class="chart-hint">Click to see top candidates</span>
+                </div>
+                <canvas id="scoreChart"></canvas>
+            </div>
+            <div class="chart-container" onclick="applyFilter('trust')">
+                <div class="chart-title">
+                    Key Value Proposition
+                    <span class="chart-hint">Click to explore values</span>
+                </div>
+                <canvas id="trustChart"></canvas>
+            </div>
+            <div class="chart-container" onclick="applyFilter('local')">
+                <div class="chart-title">
+                    Location Distribution
+                    <span class="chart-hint">Click to see Home Taluka</span>
+                </div>
+                <canvas id="locationChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="table-container">
+            <div class="chart-title" style="display:flex; justify-content:space-between; align-items:center;">
+                <span>Candidate List (Sorted by Score)</span>
+                <input type="text" id="search-input" placeholder="Search name or city..." style="padding: 8px; border:1px solid #ccc; border-radius:4px; width: 250px;" onkeyup="filterTableSearch()">
+            </div>
+            <table id="candidate-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Fit Score</th>
+                        <th>Name</th>
+                        <th>Mobile</th>
+                        <th>Location</th>
+                        <th>Age</th>
+                        <th>Exp</th>
+                        <th>Bike</th>
+                        <th>App Ready</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Data rows will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONFIGURATION ---
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRhXtBEmUlXF1Jo-OWr33c08_QjO0119TOeGMSEYdWKun5Cw6LghGr5YanjFdV46k7gsPe6-d0H0FRK/pub?output=csv";
+
+        let allData = [];
+        let filteredData = [];
+        let scoreChartInstance = null;
+        let trustChartInstance = null;
+        let locationChartInstance = null;
+
+        // --- 2. SCORING LOGIC (Replacing AI Logic) ---
+        function calculateScore(candidate) {
+            let score = 0;
+            
+            // 1. Basic Eligibility (The "Yes" factors)
+            // Field work willingness
+            if (String(candidate['आपण फील्ड काम (घर-घर भेटी + कलेक्शन) करण्यास पूर्णपणे तयार आहात का?']).toLowerCase().includes('yes')) {
+                score += 20;
+            }
+            // Bike & License
+            if (String(candidate[' तुमच्याकडे स्वतःची दुचाकी आणि वैध ड्रायव्हिंग लायसन्स आहे का?']).toLowerCase().includes('yes')) {
+                score += 20;
+            }
+            // Daily Visit Capacity
+            if (String(candidate['आपल्याला दररोज किमान 20–30 ग्राहकांना भेटण्यास कलेक्शन करने आणि रिपोर्ट अपडेट करण्यास सोयीचे आहे का?']).toLowerCase().includes('yes')) {
+                score += 20;
+            }
+            // App Usage
+            if (String(candidate['आपण रोजचे कलेक्शन मोबाईल अॅपमध्ये नीट, वेळेवर अपडेट करू शकता का?']).toLowerCase().includes('yes')) {
+                score += 10;
+            }
+
+            // 2. Experience Analysis (Pattern Matching)
+            const expText = String(candidate['तुम्ही याआधी कलेक्शन/फील्ड/सेल्स काम केले आहे का? असल्यास किती वर्षे?'] || "").toLowerCase();
+            const expKeywords = ['year', 'वर्ष', 'month', 'finance', 'collection', 'loan', 'marketing', 'sales', 'bank', 'credit'];
+            
+            let hasExp = false;
+            if (expText.length > 2 && !expText.includes('no') && !expText.includes('नाही')) {
+                // Check if text contains numbers indicating years/months or keywords
+                if (/\d/.test(expText) || expKeywords.some(k => expText.includes(k))) {
+                    score += 20;
+                    hasExp = true;
+                }
+            }
+
+            // 3. Age Preference (Preferred 20-40 for field work)
+            const age = parseInt(candidate['वय']);
+            if (age >= 20 && age <= 40) score += 5;
+            else if (age > 40 && age <= 50) score += 2;
+
+            // 4. Trust/Psychographic Factor
+            const trustFactor = String(candidate['तुमच्या मते ग्राहकांशी विश्वास निर्माण करण्यासाठी सर्वात महत्त्वाची गोष्ट कोणती?']).toLowerCase();
+            if (trustFactor.includes('विश्वास') || trustFactor.includes('trust')) score += 5;
+            if (trustFactor.includes('नम्र') || trustFactor.includes('polite')) score += 5;
+
+            return {
+                totalScore: Math.min(score, 100), // Cap at 100
+                hasExp: hasExp
+            };
+        }
+
+        // --- 3. FETCH AND PROCESS DATA ---
+        function fetchData() {
+            document.getElementById('loading').style.display = 'flex';
+            
+            Papa.parse(SHEET_CSV_URL, {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    processData(results.data);
+                },
+                error: function(err) {
+                    alert("Error loading data. Check internet connection.");
+                    console.error(err);
+                    document.getElementById('loading').style.display = 'none';
+                }
+            });
+        }
+
+        function processData(data) {
+            // Remove empty rows
+            const cleanData = data.filter(row => row['Contact Number IMP'] && row['आपले पूर्ण नाव']);
+
+            // Augment data with Score
+            allData = cleanData.map(row => {
+                const analysis = calculateScore(row);
+                return {
+                    ...row,
+                    fitScore: analysis.totalScore,
+                    isExperienced: analysis.hasExp
+                };
+            });
+
+            // Sort by Score (Desc) then by Timestamp (Desc)
+            allData.sort((a, b) => b.fitScore - a.fitScore);
+
+            // Initial Filter is "All"
+            filteredData = [...allData];
+
+            updateKPIs();
+            renderCharts();
+            renderTable(filteredData);
+            
+            const now = new Date();
+            document.getElementById('last-updated').innerText = now.toLocaleTimeString();
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // --- 4. UPDATE DASHBOARD UI ---
+        function updateKPIs() {
+            document.getElementById('total-candidates').innerText = allData.length;
+            
+            const topRated = allData.filter(c => c.fitScore >= 80).length;
+            document.getElementById('top-rated').innerText = topRated;
+
+            const bikeCount = allData.filter(c => String(c[' तुमच्याकडे स्वतःची दुचाकी आणि वैध ड्रायव्हिंग लायसन्स आहे का?']).toLowerCase().includes('yes')).length;
+            const bikePerc = allData.length ? Math.round((bikeCount / allData.length) * 100) : 0;
+            document.getElementById('bike-ready').innerText = bikePerc + "%";
+
+            const expCount = allData.filter(c => c.isExperienced).length;
+            document.getElementById('experienced-count').innerText = expCount;
+        }
+
+        // --- 5. INTERACTIVE FILTERS ---
+        function applyFilter(type) {
+            const statusDiv = document.getElementById('filter-status');
+            const statusText = document.getElementById('filter-name');
+            statusDiv.style.display = 'flex';
+
+            switch(type) {
+                case 'top':
+                    filteredData = allData.filter(d => d.fitScore >= 80);
+                    statusText.innerText = "Top Scored Candidates (80+)";
+                    break;
+                case 'bike':
+                    filteredData = allData.filter(d => String(d[' तुमच्याकडे स्वतःची दुचाकी आणि वैध ड्रायव्हिंग लायसन्स आहे का?']).toLowerCase().includes('yes'));
+                    statusText.innerText = "Candidates with Bike & License";
+                    break;
+                case 'exp':
+                    filteredData = allData.filter(d => d.isExperienced);
+                    statusText.innerText = "Experienced Candidates";
+                    break;
+                case 'local':
+                    filteredData = allData.filter(d => String(d['तुम्ही कोणत्या परिसरात फील्डवर काम करण्यास तयार आहात?']).includes('आपला तालुका'));
+                    statusText.innerText = "Candidates preferring Home Taluka";
+                    break;
+                case 'trust':
+                    // Just a visual filter for "Trust" focused candidates
+                    filteredData = allData.filter(d => String(d['तुमच्या मते ग्राहकांशी विश्वास निर्माण करण्यासाठी सर्वात महत्त्वाची गोष्ट कोणती?']).includes('विश्वास'));
+                    statusText.innerText = "Candidates valuing 'Trust' (Vishwas)";
+                    break;
+                default:
+                    filteredData = [...allData];
+                    break;
+            }
+            renderTable(filteredData);
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-status').style.display = 'none';
+            filteredData = [...allData];
+            renderTable(filteredData);
+        }
+
+        // --- 6. CHARTS & TABLES ---
+        function renderCharts() {
+            // Data Prep
+            const scores = { high: 0, med: 0, low: 0 };
+            allData.forEach(c => {
+                if (c.fitScore >= 80) scores.high++;
+                else if (c.fitScore >= 50) scores.med++;
+                else scores.low++;
+            });
+
+            const trustMap = {};
+            allData.forEach(c => {
+                let key = c['तुमच्या मते ग्राहकांशी विश्वास निर्माण करण्यासाठी सर्वात महत्त्वाची गोष्ट कोणती?'] || 'Other';
+                key = key.trim();
+                // Shorten labels
+                if(key.length > 15) key = key.substring(0, 15) + '...';
+                trustMap[key] = (trustMap[key] || 0) + 1;
+            });
+
+            const locMap = { 'Home Taluka': 0, '10-20KM': 0 };
+            allData.forEach(c => {
+                const loc = c['तुम्ही कोणत्या परिसरात फील्डवर काम करण्यास तयार आहात?'];
+                if(loc && loc.includes('आपला तालुका')) locMap['Home Taluka']++;
+                else locMap['10-20KM']++;
+            });
+
+            // Destroy old charts
+            if (scoreChartInstance) scoreChartInstance.destroy();
+            if (trustChartInstance) trustChartInstance.destroy();
+            if (locationChartInstance) locationChartInstance.destroy();
+
+            // 1. Score Chart
+            const ctx1 = document.getElementById('scoreChart').getContext('2d');
+            scoreChartInstance = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['High Fit (80+)', 'Medium Fit (50-79)', 'Low Fit (<50)'],
+                    datasets: [{
+                        data: [scores.high, scores.med, scores.low],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { maintainAspectRatio: false, cutout: '70%' }
+            });
+
+            // 2. Trust Chart
+            const ctx2 = document.getElementById('trustChart').getContext('2d');
+            trustChartInstance = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(trustMap),
+                    datasets: [{
+                        label: 'Count',
+                        data: Object.values(trustMap),
+                        backgroundColor: '#4a148c',
+                        borderRadius: 5
+                    }]
+                },
+                options: { 
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // 3. Location Chart
+            const ctx3 = document.getElementById('locationChart').getContext('2d');
+            locationChartInstance = new Chart(ctx3, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(locMap),
+                    datasets: [{
+                        data: Object.values(locMap),
+                        backgroundColor: ['#d84315', '#2563eb']
+                    }]
+                },
+                options: { maintainAspectRatio: false }
+            });
+        }
+
+        function renderTable(dataset) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            dataset.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                
+                // Color Logic
+                let badgeClass = 'badge-low';
+                let statusText = 'Review';
+                let barColor = '#ef4444';
+
+                if (row.fitScore >= 80) {
+                    badgeClass = 'badge-high';
+                    statusText = 'Excellent';
+                    barColor = '#10b981';
+                } else if (row.fitScore >= 50) {
+                    badgeClass = 'badge-med';
+                    statusText = 'Good';
+                    barColor = '#f59e0b';
+                }
+
+                // Experience Shortener for display tooltip
+                let expShort = row['तुम्ही याआधी कलेक्शन/फील्ड/सेल्स काम केले आहे का? असल्यास किती वर्षे?'] || "";
+                
+                // Bike Check
+                const bike = String(row[' तुमच्याकडे स्वतःची दुचाकी आणि वैध ड्रायव्हिंग लायसन्स आहे का?']).toLowerCase().includes('yes') ? '<i class="fas fa-check-circle" style="color:green"></i>' : '<i class="fas fa-times-circle" style="color:red"></i>';
+                
+                // App Ready
+                const appReady = String(row['आपण रोजचे कलेक्शन मोबाईल अॅपमध्ये नीट, वेळेवर अपडेट करू शकता का?']).toLowerCase().includes('yes') ? '<i class="fas fa-mobile-alt" style="color:green"></i>' : '-';
+
+                tr.innerHTML = `
+                    <td>#${index + 1}</td>
+                    <td>
+                        <div class="score-display">
+                            ${row.fitScore}
+                            <div class="score-bar-bg">
+                                <div class="score-bar-fill" style="width: ${row.fitScore}%; background-color: ${barColor}"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="font-weight:600">${row['आपले पूर्ण नाव']}</td>
+                    <td><a href="tel:${row['Contact Number IMP']}" style="color:var(--primary-color); text-decoration:none;">${row['Contact Number IMP']}</a></td>
+                    <td>${row['राहण्याचे ठिकाण लिहा.']}</td>
+                    <td>${row['वय']}</td>
+                    <td title="${expShort}">${row.isExperienced ? 'Yes' : 'Fresher'}</td>
+                    <td style="text-align:center">${bike}</td>
+                    <td style="text-align:center">${appReady}</td>
+                    <td><span class="badge ${badgeClass}">${statusText}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            if(dataset.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">No candidates match this filter.</td></tr>';
+            }
+        }
+
+        function filterTableSearch() {
+            const input = document.getElementById('search-input');
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById('candidate-table');
+            const tr = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < tr.length; i++) {
+                const tdName = tr[i].getElementsByTagName('td')[2];
+                const tdLoc = tr[i].getElementsByTagName('td')[4];
+                if (tdName || tdLoc) {
+                    const txtValueName = tdName.textContent || tdName.innerText;
+                    const txtValueLoc = tdLoc.textContent || tdLoc.innerText;
+                    if (txtValueName.toUpperCase().indexOf(filter) > -1 || txtValueLoc.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        // Initial Load
+        window.onload = fetchData;
+
+    </script>
+</body>
+</html>
