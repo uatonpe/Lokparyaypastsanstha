@@ -62,6 +62,7 @@
         .header-text span {
             color: var(--secondary-color);
             font-size: 0.9rem;
+            font-weight: bold;
         }
 
         .header-right {
@@ -98,7 +99,7 @@
             padding: 10px 15px;
             border-radius: 5px;
             margin-bottom: 20px;
-            display: none; /* Hidden by default */
+            display: none;
             font-weight: bold;
             justify-content: space-between;
             align-items: center;
@@ -116,7 +117,7 @@
         /* KPI Cards */
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -139,18 +140,8 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
-        .kpi-card::after {
-            content: 'Click to Filter';
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            font-size: 0.6rem;
-            color: #ccc;
-            text-transform: uppercase;
-        }
-
         .kpi-icon {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             color: var(--primary-color);
             margin-right: 15px;
             opacity: 0.8;
@@ -158,14 +149,14 @@
 
         .kpi-info h3 {
             margin: 0;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-light);
             text-transform: uppercase;
         }
 
         .kpi-info p {
             margin: 5px 0 0;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 700;
             color: var(--text-dark);
         }
@@ -173,7 +164,7 @@
         /* Charts Section */
         .charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -305,8 +296,8 @@
     <!-- Loading Screen -->
     <div id="loading">
         <div class="spinner"></div>
-        <h3>Analysing Data with Smart Logic...</h3>
-        <p>Fetching Live Responses</p>
+        <h3>Analysing Data & Adjusting Gender...</h3>
+        <p>A Tool by Umesh</p>
     </div>
 
     <!-- Header -->
@@ -356,11 +347,12 @@
                     <p id="bike-ready">0%</p>
                 </div>
             </div>
-            <div class="kpi-card" style="border-color: #2563eb;" onclick="applyFilter('exp')">
-                <div class="kpi-icon" style="color:#2563eb"><i class="fas fa-briefcase"></i></div>
+            <!-- Replaced Experience with Gender for this update -->
+            <div class="kpi-card" style="border-color: #e91e63;" onclick="applyFilter('female')">
+                <div class="kpi-icon" style="color:#e91e63"><i class="fas fa-female"></i></div>
                 <div class="kpi-info">
-                    <h3>Experienced</h3>
-                    <p id="experienced-count">0</p>
+                    <h3>Female Candidates</h3>
+                    <p id="female-count">0</p>
                 </div>
             </div>
         </div>
@@ -369,24 +361,35 @@
         <div class="charts-grid">
             <div class="chart-container" onclick="applyFilter('top')">
                 <div class="chart-title">
-                    Candidate Fit Analysis
-                    <span class="chart-hint">Click to see top candidates</span>
+                    Fit Score Analysis
+                    <span class="chart-hint">Click to see top</span>
                 </div>
                 <canvas id="scoreChart"></canvas>
             </div>
-            <div class="chart-container" onclick="applyFilter('trust')">
+            
+            <!-- NEW GENDER CHART -->
+            <div class="chart-container" onclick="resetFilters()">
                 <div class="chart-title">
-                    Key Value Proposition
-                    <span class="chart-hint">Click to explore values</span>
+                    Gender Distribution
+                    <span class="chart-hint">Auto-Adjusted for Old Data</span>
                 </div>
-                <canvas id="trustChart"></canvas>
+                <canvas id="genderChart"></canvas>
             </div>
+
             <div class="chart-container" onclick="applyFilter('local')">
                 <div class="chart-title">
                     Location Distribution
-                    <span class="chart-hint">Click to see Home Taluka</span>
+                    <span class="chart-hint">Click for Home Taluka</span>
                 </div>
                 <canvas id="locationChart"></canvas>
+            </div>
+            
+            <div class="chart-container" onclick="applyFilter('trust')">
+                <div class="chart-title">
+                    Key Values (Trust)
+                    <span class="chart-hint">Psychographics</span>
+                </div>
+                <canvas id="trustChart"></canvas>
             </div>
         </div>
 
@@ -401,13 +404,13 @@
                     <tr>
                         <th>Rank</th>
                         <th>Fit Score</th>
+                        <th>Gen.</th> <!-- New Column -->
                         <th>Name</th>
                         <th>Mobile</th>
                         <th>Location</th>
                         <th>Age</th>
                         <th>Exp</th>
                         <th>Bike</th>
-                        <th>App Ready</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -427,54 +430,76 @@
         let scoreChartInstance = null;
         let trustChartInstance = null;
         let locationChartInstance = null;
+        let genderChartInstance = null;
 
-        // --- 2. SCORING LOGIC (Replacing AI Logic) ---
+        // --- 2. LOGIC SECTION ---
+        
+        // Function to Guess Gender for Old Data
+        function identifyGender(row) {
+            // 1. If data exists in the sheet (New Data), use it
+            if (row['Gender'] && row['Gender'].length > 2) {
+                return row['Gender'];
+            }
+
+            // 2. If data is missing (Old Data), Guess based on Name
+            const name = (row['आपले पूर्ण नाव'] || "").toLowerCase();
+            
+            // List of known Female indicators for this dataset
+            // Based on your previous data: Priyanka, Suvarna, Bharti, Komal, Kranti, Shital, Pooja, Archana etc.
+            if (
+                name.includes("priyanka") || 
+                name.includes("suvarna") || 
+                name.includes("bharti") || 
+                name.includes("komal") || 
+                name.includes("kranti") || 
+                name.includes("shital") ||
+                name.includes("pooja") || 
+                name.includes("archana") ||
+                name.includes("smt") ||
+                name.includes("mrs") ||
+                name.includes("miss") ||
+                name.endsWith("bai") ||
+                name.endsWith("tai")
+            ) {
+                return "Female";
+            }
+
+            // 3. Default to Male
+            // Since 90% of field collection applicants in the sample were Male
+            return "Male";
+        }
+
         function calculateScore(candidate) {
             let score = 0;
             
-            // 1. Basic Eligibility (The "Yes" factors)
-            // Field work willingness
-            if (String(candidate['आपण फील्ड काम (घर-घर भेटी + कलेक्शन) करण्यास पूर्णपणे तयार आहात का?']).toLowerCase().includes('yes')) {
-                score += 20;
-            }
-            // Bike & License
-            if (String(candidate[' तुमच्याकडे स्वतःची दुचाकी आणि वैध ड्रायव्हिंग लायसन्स आहे का?']).toLowerCase().includes('yes')) {
-                score += 20;
-            }
-            // Daily Visit Capacity
-            if (String(candidate['आपल्याला दररोज किमान 20–30 ग्राहकांना भेटण्यास कलेक्शन करने आणि रिपोर्ट अपडेट करण्यास सोयीचे आहे का?']).toLowerCase().includes('yes')) {
-                score += 20;
-            }
-            // App Usage
-            if (String(candidate['आपण रोजचे कलेक्शन मोबाईल अॅपमध्ये नीट, वेळेवर अपडेट करू शकता का?']).toLowerCase().includes('yes')) {
-                score += 10;
-            }
+            // 1. Basic Eligibility
+            if (String(candidate['आपण फील्ड काम (घर-घर भेटी + कलेक्शन) करण्यास पूर्णपणे तयार आहात का?']).toLowerCase().includes('yes')) score += 20;
+            if (String(candidate[' तुमच्याकडे स्वतःची दुचाकी आणि वैध ड्रायव्हिंग लायसन्स आहे का?']).toLowerCase().includes('yes')) score += 20;
+            if (String(candidate['आपल्याला दररोज किमान 20–30 ग्राहकांना भेटण्यास कलेक्शन करने आणि रिपोर्ट अपडेट करण्यास सोयीचे आहे का?']).toLowerCase().includes('yes')) score += 20;
+            if (String(candidate['आपण रोजचे कलेक्शन मोबाईल अॅपमध्ये नीट, वेळेवर अपडेट करू शकता का?']).toLowerCase().includes('yes')) score += 10;
 
-            // 2. Experience Analysis (Pattern Matching)
+            // 2. Experience Analysis
             const expText = String(candidate['तुम्ही याआधी कलेक्शन/फील्ड/सेल्स काम केले आहे का? असल्यास किती वर्षे?'] || "").toLowerCase();
-            const expKeywords = ['year', 'वर्ष', 'month', 'finance', 'collection', 'loan', 'marketing', 'sales', 'bank', 'credit'];
-            
+            const expKeywords = ['year', 'वर्ष', 'month', 'finance', 'collection', 'loan', 'marketing', 'sales'];
             let hasExp = false;
             if (expText.length > 2 && !expText.includes('no') && !expText.includes('नाही')) {
-                // Check if text contains numbers indicating years/months or keywords
                 if (/\d/.test(expText) || expKeywords.some(k => expText.includes(k))) {
                     score += 20;
                     hasExp = true;
                 }
             }
 
-            // 3. Age Preference (Preferred 20-40 for field work)
+            // 3. Age Preference (20-40)
             const age = parseInt(candidate['वय']);
             if (age >= 20 && age <= 40) score += 5;
             else if (age > 40 && age <= 50) score += 2;
 
-            // 4. Trust/Psychographic Factor
+            // 4. Trust Factor
             const trustFactor = String(candidate['तुमच्या मते ग्राहकांशी विश्वास निर्माण करण्यासाठी सर्वात महत्त्वाची गोष्ट कोणती?']).toLowerCase();
-            if (trustFactor.includes('विश्वास') || trustFactor.includes('trust')) score += 5;
-            if (trustFactor.includes('नम्र') || trustFactor.includes('polite')) score += 5;
+            if (trustFactor.includes('विश्वास') || trustFactor.includes('trust') || trustFactor.includes('नम्र')) score += 5;
 
             return {
-                totalScore: Math.min(score, 100), // Cap at 100
+                totalScore: Math.min(score, 100),
                 hasExp: hasExp
             };
         }
@@ -491,38 +516,35 @@
                 },
                 error: function(err) {
                     alert("Error loading data. Check internet connection.");
-                    console.error(err);
                     document.getElementById('loading').style.display = 'none';
                 }
             });
         }
 
         function processData(data) {
-            // Remove empty rows
             const cleanData = data.filter(row => row['Contact Number IMP'] && row['आपले पूर्ण नाव']);
 
-            // Augment data with Score
             allData = cleanData.map(row => {
                 const analysis = calculateScore(row);
+                // ADJUST GENDER HERE
+                const detectedGender = identifyGender(row);
+                
                 return {
                     ...row,
                     fitScore: analysis.totalScore,
-                    isExperienced: analysis.hasExp
+                    isExperienced: analysis.hasExp,
+                    finalGender: detectedGender // Store the detected/actual gender
                 };
             });
 
-            // Sort by Score (Desc) then by Timestamp (Desc)
             allData.sort((a, b) => b.fitScore - a.fitScore);
-
-            // Initial Filter is "All"
             filteredData = [...allData];
 
             updateKPIs();
             renderCharts();
             renderTable(filteredData);
             
-            const now = new Date();
-            document.getElementById('last-updated').innerText = now.toLocaleTimeString();
+            document.getElementById('last-updated').innerText = new Date().toLocaleTimeString();
             document.getElementById('loading').style.display = 'none';
         }
 
@@ -537,11 +559,12 @@
             const bikePerc = allData.length ? Math.round((bikeCount / allData.length) * 100) : 0;
             document.getElementById('bike-ready').innerText = bikePerc + "%";
 
-            const expCount = allData.filter(c => c.isExperienced).length;
-            document.getElementById('experienced-count').innerText = expCount;
+            // Updated KPI for Gender
+            const femaleCount = allData.filter(c => c.finalGender === 'Female').length;
+            document.getElementById('female-count').innerText = femaleCount;
         }
 
-        // --- 5. INTERACTIVE FILTERS ---
+        // --- 5. FILTERS ---
         function applyFilter(type) {
             const statusDiv = document.getElementById('filter-status');
             const statusText = document.getElementById('filter-name');
@@ -554,20 +577,23 @@
                     break;
                 case 'bike':
                     filteredData = allData.filter(d => String(d[' तुमच्याकडे स्वतःची दुचाकी आणि वैध ड्रायव्हिंग लायसन्स आहे का?']).toLowerCase().includes('yes'));
-                    statusText.innerText = "Candidates with Bike & License";
+                    statusText.innerText = "Bike & License Ready";
                     break;
-                case 'exp':
-                    filteredData = allData.filter(d => d.isExperienced);
-                    statusText.innerText = "Experienced Candidates";
+                case 'female':
+                    filteredData = allData.filter(d => d.finalGender === 'Female');
+                    statusText.innerText = "Female Candidates";
+                    break;
+                case 'male':
+                    filteredData = allData.filter(d => d.finalGender === 'Male');
+                    statusText.innerText = "Male Candidates";
                     break;
                 case 'local':
                     filteredData = allData.filter(d => String(d['तुम्ही कोणत्या परिसरात फील्डवर काम करण्यास तयार आहात?']).includes('आपला तालुका'));
-                    statusText.innerText = "Candidates preferring Home Taluka";
+                    statusText.innerText = "Home Taluka Candidates";
                     break;
                 case 'trust':
-                    // Just a visual filter for "Trust" focused candidates
                     filteredData = allData.filter(d => String(d['तुमच्या मते ग्राहकांशी विश्वास निर्माण करण्यासाठी सर्वात महत्त्वाची गोष्ट कोणती?']).includes('विश्वास'));
-                    statusText.innerText = "Candidates valuing 'Trust' (Vishwas)";
+                    statusText.innerText = "Candidates valuing Trust";
                     break;
                 default:
                     filteredData = [...allData];
@@ -582,84 +608,82 @@
             renderTable(filteredData);
         }
 
-        // --- 6. CHARTS & TABLES ---
+        // --- 6. CHARTS ---
         function renderCharts() {
-            // Data Prep
+            // Scores
             const scores = { high: 0, med: 0, low: 0 };
             allData.forEach(c => {
-                if (c.fitScore >= 80) scores.high++;
-                else if (c.fitScore >= 50) scores.med++;
-                else scores.low++;
+                if (c.fitScore >= 80) scores.high++; else if (c.fitScore >= 50) scores.med++; else scores.low++;
             });
 
+            // Gender
+            const genderCount = { Male: 0, Female: 0 };
+            allData.forEach(c => {
+                if(c.finalGender === 'Female') genderCount.Female++;
+                else genderCount.Male++;
+            });
+
+            // Trust (Shortened)
             const trustMap = {};
             allData.forEach(c => {
                 let key = c['तुमच्या मते ग्राहकांशी विश्वास निर्माण करण्यासाठी सर्वात महत्त्वाची गोष्ट कोणती?'] || 'Other';
                 key = key.trim();
-                // Shorten labels
-                if(key.length > 15) key = key.substring(0, 15) + '...';
+                if(key.length > 10) key = key.substring(0, 10) + '..';
                 trustMap[key] = (trustMap[key] || 0) + 1;
             });
 
-            const locMap = { 'Home Taluka': 0, '10-20KM': 0 };
+            // Location
+            const locMap = { 'Home Taluka': 0, 'Outside': 0 };
             allData.forEach(c => {
                 const loc = c['तुम्ही कोणत्या परिसरात फील्डवर काम करण्यास तयार आहात?'];
                 if(loc && loc.includes('आपला तालुका')) locMap['Home Taluka']++;
-                else locMap['10-20KM']++;
+                else locMap['Outside']++;
             });
 
             // Destroy old charts
             if (scoreChartInstance) scoreChartInstance.destroy();
             if (trustChartInstance) trustChartInstance.destroy();
             if (locationChartInstance) locationChartInstance.destroy();
+            if (genderChartInstance) genderChartInstance.destroy();
 
-            // 1. Score Chart
-            const ctx1 = document.getElementById('scoreChart').getContext('2d');
-            scoreChartInstance = new Chart(ctx1, {
+            // 1. Score
+            scoreChartInstance = new Chart(document.getElementById('scoreChart'), {
                 type: 'doughnut',
                 data: {
-                    labels: ['High Fit (80+)', 'Medium Fit (50-79)', 'Low Fit (<50)'],
-                    datasets: [{
-                        data: [scores.high, scores.med, scores.low],
-                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                        borderWidth: 0
-                    }]
+                    labels: ['High', 'Medium', 'Low'],
+                    datasets: [{ data: [scores.high, scores.med, scores.low], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }]
                 },
-                options: { maintainAspectRatio: false, cutout: '70%' }
+                options: { maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
             });
 
-            // 2. Trust Chart
-            const ctx2 = document.getElementById('trustChart').getContext('2d');
-            trustChartInstance = new Chart(ctx2, {
+            // 2. Gender Chart (NEW)
+            genderChartInstance = new Chart(document.getElementById('genderChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Male', 'Female'],
+                    datasets: [{ data: [genderCount.Male, genderCount.Female], backgroundColor: ['#3b82f6', '#e91e63'] }]
+                },
+                options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            // 3. Location
+            locationChartInstance = new Chart(document.getElementById('locationChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Home', 'Outside'],
+                    datasets: [{ data: [locMap['Home Taluka'], locMap['Outside']], backgroundColor: ['#d84315', '#9e9e9e'] }]
+                },
+                options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            // 4. Trust
+            trustChartInstance = new Chart(document.getElementById('trustChart'), {
                 type: 'bar',
                 data: {
                     labels: Object.keys(trustMap),
-                    datasets: [{
-                        label: 'Count',
-                        data: Object.values(trustMap),
-                        backgroundColor: '#4a148c',
-                        borderRadius: 5
-                    }]
+                    datasets: [{ label: 'Count', data: Object.values(trustMap), backgroundColor: '#4a148c' }]
                 },
-                options: { 
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } },
-                    plugins: { legend: { display: false } }
-                }
-            });
-
-            // 3. Location Chart
-            const ctx3 = document.getElementById('locationChart').getContext('2d');
-            locationChartInstance = new Chart(ctx3, {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(locMap),
-                    datasets: [{
-                        data: Object.values(locMap),
-                        backgroundColor: ['#d84315', '#2563eb']
-                    }]
-                },
-                options: { maintainAspectRatio: false }
+                options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
             });
         }
 
@@ -670,70 +694,51 @@
             dataset.forEach((row, index) => {
                 const tr = document.createElement('tr');
                 
-                // Color Logic
-                let badgeClass = 'badge-low';
-                let statusText = 'Review';
-                let barColor = '#ef4444';
+                let badgeClass = row.fitScore >= 80 ? 'badge-high' : (row.fitScore >= 50 ? 'badge-med' : 'badge-low');
+                let statusText = row.fitScore >= 80 ? 'Excellent' : (row.fitScore >= 50 ? 'Good' : 'Review');
+                let barColor = row.fitScore >= 80 ? '#10b981' : (row.fitScore >= 50 ? '#f59e0b' : '#ef4444');
 
-                if (row.fitScore >= 80) {
-                    badgeClass = 'badge-high';
-                    statusText = 'Excellent';
-                    barColor = '#10b981';
-                } else if (row.fitScore >= 50) {
-                    badgeClass = 'badge-med';
-                    statusText = 'Good';
-                    barColor = '#f59e0b';
-                }
+                const bike = String(row[' तुमच्याकडे स्वतःची दुचाकी आणि वैध ड्रायव्हिंग लायसन्स आहे का?']).toLowerCase().includes('yes') 
+                    ? '<i class="fas fa-check-circle" style="color:green"></i>' : '<i class="fas fa-times-circle" style="color:red"></i>';
+                
+                // Gender Icon
+                const genderIcon = row.finalGender === 'Female' 
+                    ? '<i class="fas fa-female" style="color:#e91e63; font-size:1.2rem;" title="Female"></i>' 
+                    : '<i class="fas fa-male" style="color:#3b82f6; font-size:1.2rem;" title="Male"></i>';
 
-                // Experience Shortener for display tooltip
-                let expShort = row['तुम्ही याआधी कलेक्शन/फील्ड/सेल्स काम केले आहे का? असल्यास किती वर्षे?'] || "";
-                
-                // Bike Check
-                const bike = String(row[' तुमच्याकडे स्वतःची दुचाकी आणि वैध ड्रायव्हिंग लायसन्स आहे का?']).toLowerCase().includes('yes') ? '<i class="fas fa-check-circle" style="color:green"></i>' : '<i class="fas fa-times-circle" style="color:red"></i>';
-                
-                // App Ready
-                const appReady = String(row['आपण रोजचे कलेक्शन मोबाईल अॅपमध्ये नीट, वेळेवर अपडेट करू शकता का?']).toLowerCase().includes('yes') ? '<i class="fas fa-mobile-alt" style="color:green"></i>' : '-';
+                let expText = row.isExperienced ? 'Yes' : 'No';
 
                 tr.innerHTML = `
                     <td>#${index + 1}</td>
                     <td>
                         <div class="score-display">
                             ${row.fitScore}
-                            <div class="score-bar-bg">
-                                <div class="score-bar-fill" style="width: ${row.fitScore}%; background-color: ${barColor}"></div>
-                            </div>
+                            <div class="score-bar-bg"><div class="score-bar-fill" style="width: ${row.fitScore}%; background-color: ${barColor}"></div></div>
                         </div>
                     </td>
+                    <td style="text-align:center">${genderIcon}</td>
                     <td style="font-weight:600">${row['आपले पूर्ण नाव']}</td>
                     <td><a href="tel:${row['Contact Number IMP']}" style="color:var(--primary-color); text-decoration:none;">${row['Contact Number IMP']}</a></td>
                     <td>${row['राहण्याचे ठिकाण लिहा.']}</td>
                     <td>${row['वय']}</td>
-                    <td title="${expShort}">${row.isExperienced ? 'Yes' : 'Fresher'}</td>
+                    <td>${expText}</td>
                     <td style="text-align:center">${bike}</td>
-                    <td style="text-align:center">${appReady}</td>
                     <td><span class="badge ${badgeClass}">${statusText}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
             
-            if(dataset.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">No candidates match this filter.</td></tr>';
-            }
+            if(dataset.length === 0) tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">No candidates found.</td></tr>';
         }
 
         function filterTableSearch() {
-            const input = document.getElementById('search-input');
-            const filter = input.value.toUpperCase();
-            const table = document.getElementById('candidate-table');
-            const tr = table.getElementsByTagName('tr');
-
+            const filter = document.getElementById('search-input').value.toUpperCase();
+            const tr = document.getElementById('candidate-table').getElementsByTagName('tr');
             for (let i = 1; i < tr.length; i++) {
-                const tdName = tr[i].getElementsByTagName('td')[2];
-                const tdLoc = tr[i].getElementsByTagName('td')[4];
+                const tdName = tr[i].getElementsByTagName('td')[3];
+                const tdLoc = tr[i].getElementsByTagName('td')[5];
                 if (tdName || tdLoc) {
-                    const txtValueName = tdName.textContent || tdName.innerText;
-                    const txtValueLoc = tdLoc.textContent || tdLoc.innerText;
-                    if (txtValueName.toUpperCase().indexOf(filter) > -1 || txtValueLoc.toUpperCase().indexOf(filter) > -1) {
+                    if ((tdName.innerText || "").toUpperCase().indexOf(filter) > -1 || (tdLoc.innerText || "").toUpperCase().indexOf(filter) > -1) {
                         tr[i].style.display = "";
                     } else {
                         tr[i].style.display = "none";
@@ -742,7 +747,6 @@
             }
         }
 
-        // Initial Load
         window.onload = fetchData;
 
     </script>
