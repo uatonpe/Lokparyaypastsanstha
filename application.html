@@ -296,7 +296,7 @@
     <!-- Loading Screen -->
     <div id="loading">
         <div class="spinner"></div>
-        <h3>Analysing Data & Adjusting Gender...</h3>
+        <h3>Refreshing Data from Google Sheet...</h3>
         <p>A Tool by Umesh</p>
     </div>
 
@@ -347,7 +347,6 @@
                     <p id="bike-ready">0%</p>
                 </div>
             </div>
-            <!-- Replaced Experience with Gender for this update -->
             <div class="kpi-card" style="border-color: #e91e63;" onclick="applyFilter('female')">
                 <div class="kpi-icon" style="color:#e91e63"><i class="fas fa-female"></i></div>
                 <div class="kpi-info">
@@ -371,7 +370,7 @@
             <div class="chart-container" onclick="resetFilters()">
                 <div class="chart-title">
                     Gender Distribution
-                    <span class="chart-hint">Auto-Adjusted for Old Data</span>
+                    <span class="chart-hint">Detected from Name/Form</span>
                 </div>
                 <canvas id="genderChart"></canvas>
             </div>
@@ -404,7 +403,7 @@
                     <tr>
                         <th>Rank</th>
                         <th>Fit Score</th>
-                        <th>Gen.</th> <!-- New Column -->
+                        <th>Gen.</th>
                         <th>Name</th>
                         <th>Mobile</th>
                         <th>Location</th>
@@ -434,38 +433,37 @@
 
         // --- 2. LOGIC SECTION ---
         
-        // Function to Guess Gender for Old Data
         function identifyGender(row) {
-            // 1. If data exists in the sheet (New Data), use it
-            if (row['Gender'] && row['Gender'].length > 2) {
-                return row['Gender'];
+            // 1. Try to find the Gender column (Check exact match or 'Gender ')
+            // Google CSV sometimes adds a space or case differences
+            let rawGender = row['Gender'] || row['Gender '] || row['लिंग'];
+
+            if (rawGender && rawGender.length > 2) {
+                // If data exists in the form, use it
+                return rawGender;
             }
 
-            // 2. If data is missing (Old Data), Guess based on Name
-            const name = (row['आपले पूर्ण नाव'] || "").toLowerCase();
+            // 2. If NO data in column (Old Data), Guess based on Name
+            const name = (row['आपले पूर्ण नाव'] || "").toLowerCase().trim();
             
-            // List of known Female indicators for this dataset
-            // Based on your previous data: Priyanka, Suvarna, Bharti, Komal, Kranti, Shital, Pooja, Archana etc.
-            if (
-                name.includes("priyanka") || 
-                name.includes("suvarna") || 
-                name.includes("bharti") || 
-                name.includes("komal") || 
-                name.includes("kranti") || 
-                name.includes("shital") ||
-                name.includes("pooja") || 
-                name.includes("archana") ||
-                name.includes("smt") ||
-                name.includes("mrs") ||
-                name.includes("miss") ||
-                name.endsWith("bai") ||
-                name.endsWith("tai")
-            ) {
+            // Expanded List of Female Names (English + Marathi)
+            const femaleKeywords = [
+                // English
+                "priyanka", "suvarna", "bharti", "komal", "kranti", "shital",
+                "pooja", "archana", "smt", "mrs", "miss", "bai", "tai", "rani", "jyoti",
+                // Marathi
+                "श्रीमती", "सौ", "ताई", "प्रियंका", "सुवर्णा", "कोमल", "पूजा", 
+                "शीतल", "भारती", "राणी", "ज्योती", "अर्चना"
+            ];
+
+            // Check if name contains any of these
+            const isFemale = femaleKeywords.some(keyword => name.includes(keyword));
+
+            if (isFemale) {
                 return "Female";
             }
 
-            // 3. Default to Male
-            // Since 90% of field collection applicants in the sample were Male
+            // 3. Default to Male (Majority assumption for field job)
             return "Male";
         }
 
@@ -508,7 +506,11 @@
         function fetchData() {
             document.getElementById('loading').style.display = 'flex';
             
-            Papa.parse(SHEET_CSV_URL, {
+            // Add a random parameter to URL to prevent browser caching of CSV
+            const timestamp = new Date().getTime();
+            const freshUrl = SHEET_CSV_URL + "&t=" + timestamp;
+
+            Papa.parse(freshUrl, {
                 download: true,
                 header: true,
                 complete: function(results) {
@@ -533,7 +535,7 @@
                     ...row,
                     fitScore: analysis.totalScore,
                     isExperienced: analysis.hasExp,
-                    finalGender: detectedGender // Store the detected/actual gender
+                    finalGender: detectedGender
                 };
             });
 
@@ -559,7 +561,7 @@
             const bikePerc = allData.length ? Math.round((bikeCount / allData.length) * 100) : 0;
             document.getElementById('bike-ready').innerText = bikePerc + "%";
 
-            // Updated KPI for Gender
+            // KPI for Gender
             const femaleCount = allData.filter(c => c.finalGender === 'Female').length;
             document.getElementById('female-count').innerText = femaleCount;
         }
