@@ -303,7 +303,7 @@
     <!-- Header -->
     <header>
         <div class="logo-container">
-            <img src="https://i.ibb.co/2h1vD4q/logo.jpg" alt="Lokparyay Logo" onerror="this.src='https://via.placeholder.com/100x100?text=LOGO'">
+            <img src="https://i.ibb.co/2h1vD4q/logo.jpg" alt="Logo" onerror="this.src='https://via.placeholder.com/100x100?text=LOGO'">
         </div>
         <div class="header-text">
             <h1>लोकपर्याय डिस्ट्रिक्ट को-ऑपरेटिव्ह क्रेडिट सोसायटी लि.</h1>
@@ -366,7 +366,6 @@
                 <canvas id="scoreChart"></canvas>
             </div>
             
-            <!-- NEW GENDER CHART -->
             <div class="chart-container" onclick="resetFilters()">
                 <div class="chart-title">
                     Gender Distribution
@@ -375,12 +374,13 @@
                 <canvas id="genderChart"></canvas>
             </div>
 
-            <div class="chart-container" onclick="applyFilter('local')">
+            <!-- Taluka Chart -->
+            <div class="chart-container">
                 <div class="chart-title">
-                    Location Distribution
-                    <span class="chart-hint">Click for Home Taluka</span>
+                    Taluka Wise Distribution
+                    <span class="chart-hint">Click bar to filter</span>
                 </div>
-                <canvas id="locationChart"></canvas>
+                <canvas id="talukaChart"></canvas>
             </div>
             
             <div class="chart-container" onclick="applyFilter('trust')">
@@ -396,7 +396,7 @@
         <div class="table-container">
             <div class="chart-title" style="display:flex; justify-content:space-between; align-items:center;">
                 <span>Candidate List (Sorted by Score)</span>
-                <input type="text" id="search-input" placeholder="Search name or city..." style="padding: 8px; border:1px solid #ccc; border-radius:4px; width: 250px;" onkeyup="filterTableSearch()">
+                <input type="text" id="search-input" placeholder="Search name or village..." style="padding: 8px; border:1px solid #ccc; border-radius:4px; width: 250px;" onkeyup="filterTableSearch()">
             </div>
             <table id="candidate-table">
                 <thead>
@@ -406,7 +406,8 @@
                         <th>Gen.</th>
                         <th>Name</th>
                         <th>Mobile</th>
-                        <th>Location</th>
+                        <th>Taluka</th>
+                        <th>Village</th>
                         <th>Age</th>
                         <th>Exp</th>
                         <th>Bike</th>
@@ -428,55 +429,43 @@
         let filteredData = [];
         let scoreChartInstance = null;
         let trustChartInstance = null;
-        let locationChartInstance = null;
+        let talukaChartInstance = null;
         let genderChartInstance = null;
 
         // --- 2. LOGIC SECTION ---
         
         function identifyGender(row) {
-            // 1. Try to find the Gender column (Check exact match or 'Gender ')
-            // Google CSV sometimes adds a space or case differences
             let rawGender = row['Gender'] || row['Gender '] || row['लिंग'];
+            if (rawGender && rawGender.length > 2) return rawGender;
 
-            if (rawGender && rawGender.length > 2) {
-                // If data exists in the form, use it
-                return rawGender;
-            }
-
-            // 2. If NO data in column (Old Data), Guess based on Name
             const name = (row['आपले पूर्ण नाव'] || "").toLowerCase().trim();
-            
-            // Expanded List of Female Names (English + Marathi)
-            const femaleKeywords = [
-                // English
-                "priyanka", "suvarna", "bharti", "komal", "kranti", "shital",
-                "pooja", "archana", "smt", "mrs", "miss", "bai", "tai", "rani", "jyoti",
-                // Marathi
-                "श्रीमती", "सौ", "ताई", "प्रियंका", "सुवर्णा", "कोमल", "पूजा", 
-                "शीतल", "भारती", "राणी", "ज्योती", "अर्चना"
-            ];
+            const femaleKeywords = ["priyanka", "suvarna", "bharti", "komal", "kranti", "shital", "pooja", "archana", "smt", "mrs", "miss", "bai", "tai", "rani", "jyoti", "श्रीमती", "सौ", "ताई", "प्रियंका", "सुवर्णा", "कोमल", "पूजा", "शीतल", "भारती", "राणी", "ज्योती", "अर्चना"];
 
-            // Check if name contains any of these
-            const isFemale = femaleKeywords.some(keyword => name.includes(keyword));
+            return femaleKeywords.some(keyword => name.includes(keyword)) ? "Female" : "Male";
+        }
 
-            if (isFemale) {
-                return "Female";
-            }
+        // Updated Helper to extract Taluka based on your columns
+        function getTaluka(row) {
+            // Priority 1: Apla Takula (Exact)
+            // Priority 2: Apla Takula  (With Space, common in Google Sheets)
+            // Priority 3: Fallback keys
+            let val = row['Apla Takula'] || row['Apla Takula '] || row['Taluka'] || row['आपला तालुका निवडा.'] || 'Unknown';
+            return val ? val.trim() : 'Unknown';
+        }
 
-            // 3. Default to Male (Majority assumption for field job)
-            return "Male";
+        // Updated Helper to extract Village based on your columns
+        function getVillage(row) {
+            let val = row['Apla Gave'] || row['Apla Gave '] || row['Village'] || row['राहण्याचे ठिकाण लिहा.'] || '';
+            return val ? val.trim() : '';
         }
 
         function calculateScore(candidate) {
             let score = 0;
-            
-            // 1. Basic Eligibility
             if (String(candidate['आपण फील्ड काम (घर-घर भेटी + कलेक्शन) करण्यास पूर्णपणे तयार आहात का?']).toLowerCase().includes('yes')) score += 20;
             if (String(candidate[' तुमच्याकडे स्वतःची दुचाकी आणि वैध ड्रायव्हिंग लायसन्स आहे का?']).toLowerCase().includes('yes')) score += 20;
             if (String(candidate['आपल्याला दररोज किमान 20–30 ग्राहकांना भेटण्यास कलेक्शन करने आणि रिपोर्ट अपडेट करण्यास सोयीचे आहे का?']).toLowerCase().includes('yes')) score += 20;
             if (String(candidate['आपण रोजचे कलेक्शन मोबाईल अॅपमध्ये नीट, वेळेवर अपडेट करू शकता का?']).toLowerCase().includes('yes')) score += 10;
 
-            // 2. Experience Analysis
             const expText = String(candidate['तुम्ही याआधी कलेक्शन/फील्ड/सेल्स काम केले आहे का? असल्यास किती वर्षे?'] || "").toLowerCase();
             const expKeywords = ['year', 'वर्ष', 'month', 'finance', 'collection', 'loan', 'marketing', 'sales'];
             let hasExp = false;
@@ -487,12 +476,10 @@
                 }
             }
 
-            // 3. Age Preference (20-40)
             const age = parseInt(candidate['वय']);
             if (age >= 20 && age <= 40) score += 5;
             else if (age > 40 && age <= 50) score += 2;
 
-            // 4. Trust Factor
             const trustFactor = String(candidate['तुमच्या मते ग्राहकांशी विश्वास निर्माण करण्यासाठी सर्वात महत्त्वाची गोष्ट कोणती?']).toLowerCase();
             if (trustFactor.includes('विश्वास') || trustFactor.includes('trust') || trustFactor.includes('नम्र')) score += 5;
 
@@ -505,14 +492,13 @@
         // --- 3. FETCH AND PROCESS DATA ---
         function fetchData() {
             document.getElementById('loading').style.display = 'flex';
-            
-            // Add a random parameter to URL to prevent browser caching of CSV
             const timestamp = new Date().getTime();
             const freshUrl = SHEET_CSV_URL + "&t=" + timestamp;
 
             Papa.parse(freshUrl, {
                 download: true,
                 header: true,
+                skipEmptyLines: true,
                 complete: function(results) {
                     processData(results.data);
                 },
@@ -528,14 +514,13 @@
 
             allData = cleanData.map(row => {
                 const analysis = calculateScore(row);
-                // ADJUST GENDER HERE
-                const detectedGender = identifyGender(row);
-                
                 return {
                     ...row,
                     fitScore: analysis.totalScore,
                     isExperienced: analysis.hasExp,
-                    finalGender: detectedGender
+                    finalGender: identifyGender(row),
+                    finalTaluka: getTaluka(row),
+                    finalVillage: getVillage(row)
                 };
             });
 
@@ -553,21 +538,17 @@
         // --- 4. UPDATE DASHBOARD UI ---
         function updateKPIs() {
             document.getElementById('total-candidates').innerText = allData.length;
-            
             const topRated = allData.filter(c => c.fitScore >= 80).length;
             document.getElementById('top-rated').innerText = topRated;
-
             const bikeCount = allData.filter(c => String(c[' तुमच्याकडे स्वतःची दुचाकी आणि वैध ड्रायव्हिंग लायसन्स आहे का?']).toLowerCase().includes('yes')).length;
             const bikePerc = allData.length ? Math.round((bikeCount / allData.length) * 100) : 0;
             document.getElementById('bike-ready').innerText = bikePerc + "%";
-
-            // KPI for Gender
             const femaleCount = allData.filter(c => c.finalGender === 'Female').length;
             document.getElementById('female-count').innerText = femaleCount;
         }
 
         // --- 5. FILTERS ---
-        function applyFilter(type) {
+        function applyFilter(type, value) {
             const statusDiv = document.getElementById('filter-status');
             const statusText = document.getElementById('filter-name');
             statusDiv.style.display = 'flex';
@@ -585,13 +566,9 @@
                     filteredData = allData.filter(d => d.finalGender === 'Female');
                     statusText.innerText = "Female Candidates";
                     break;
-                case 'male':
-                    filteredData = allData.filter(d => d.finalGender === 'Male');
-                    statusText.innerText = "Male Candidates";
-                    break;
-                case 'local':
-                    filteredData = allData.filter(d => String(d['तुम्ही कोणत्या परिसरात फील्डवर काम करण्यास तयार आहात?']).includes('आपला तालुका'));
-                    statusText.innerText = "Home Taluka Candidates";
+                case 'taluka':
+                    filteredData = allData.filter(d => d.finalTaluka === value);
+                    statusText.innerText = "Taluka: " + value;
                     break;
                 case 'trust':
                     filteredData = allData.filter(d => String(d['तुमच्या मते ग्राहकांशी विश्वास निर्माण करण्यासाठी सर्वात महत्त्वाची गोष्ट कोणती?']).includes('विश्वास'));
@@ -625,6 +602,15 @@
                 else genderCount.Male++;
             });
 
+            // Taluka Wise
+            const talukaMap = {};
+            allData.forEach(c => {
+                const t = c.finalTaluka;
+                talukaMap[t] = (talukaMap[t] || 0) + 1;
+            });
+            const talukaLabels = Object.keys(talukaMap);
+            const talukaData = Object.values(talukaMap);
+
             // Trust (Shortened)
             const trustMap = {};
             allData.forEach(c => {
@@ -634,21 +620,13 @@
                 trustMap[key] = (trustMap[key] || 0) + 1;
             });
 
-            // Location
-            const locMap = { 'Home Taluka': 0, 'Outside': 0 };
-            allData.forEach(c => {
-                const loc = c['तुम्ही कोणत्या परिसरात फील्डवर काम करण्यास तयार आहात?'];
-                if(loc && loc.includes('आपला तालुका')) locMap['Home Taluka']++;
-                else locMap['Outside']++;
-            });
-
             // Destroy old charts
             if (scoreChartInstance) scoreChartInstance.destroy();
             if (trustChartInstance) trustChartInstance.destroy();
-            if (locationChartInstance) locationChartInstance.destroy();
+            if (talukaChartInstance) talukaChartInstance.destroy();
             if (genderChartInstance) genderChartInstance.destroy();
 
-            // 1. Score
+            // 1. Score Chart
             scoreChartInstance = new Chart(document.getElementById('scoreChart'), {
                 type: 'doughnut',
                 data: {
@@ -658,7 +636,7 @@
                 options: { maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
             });
 
-            // 2. Gender Chart (NEW)
+            // 2. Gender Chart
             genderChartInstance = new Chart(document.getElementById('genderChart'), {
                 type: 'pie',
                 data: {
@@ -668,17 +646,33 @@
                 options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
 
-            // 3. Location
-            locationChartInstance = new Chart(document.getElementById('locationChart'), {
-                type: 'pie',
+            // 3. Taluka Chart (Interactive)
+            talukaChartInstance = new Chart(document.getElementById('talukaChart'), {
+                type: 'bar',
                 data: {
-                    labels: ['Home', 'Outside'],
-                    datasets: [{ data: [locMap['Home Taluka'], locMap['Outside']], backgroundColor: ['#d84315', '#9e9e9e'] }]
+                    labels: talukaLabels,
+                    datasets: [{ 
+                        label: 'Candidates', 
+                        data: talukaData, 
+                        backgroundColor: '#d84315',
+                        borderRadius: 4
+                    }]
                 },
-                options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                options: { 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+                    onClick: (e, activeEls) => {
+                        if (activeEls.length > 0) {
+                            const index = activeEls[0].index;
+                            const label = talukaLabels[index];
+                            applyFilter('taluka', label);
+                        }
+                    }
+                }
             });
 
-            // 4. Trust
+            // 4. Trust Chart
             trustChartInstance = new Chart(document.getElementById('trustChart'), {
                 type: 'bar',
                 data: {
@@ -703,7 +697,6 @@
                 const bike = String(row[' तुमच्याकडे स्वतःची दुचाकी आणि वैध ड्रायव्हिंग लायसन्स आहे का?']).toLowerCase().includes('yes') 
                     ? '<i class="fas fa-check-circle" style="color:green"></i>' : '<i class="fas fa-times-circle" style="color:red"></i>';
                 
-                // Gender Icon
                 const genderIcon = row.finalGender === 'Female' 
                     ? '<i class="fas fa-female" style="color:#e91e63; font-size:1.2rem;" title="Female"></i>' 
                     : '<i class="fas fa-male" style="color:#3b82f6; font-size:1.2rem;" title="Male"></i>';
@@ -721,7 +714,8 @@
                     <td style="text-align:center">${genderIcon}</td>
                     <td style="font-weight:600">${row['आपले पूर्ण नाव']}</td>
                     <td><a href="tel:${row['Contact Number IMP']}" style="color:var(--primary-color); text-decoration:none;">${row['Contact Number IMP']}</a></td>
-                    <td>${row['राहण्याचे ठिकाण लिहा.']}</td>
+                    <td>${row.finalTaluka}</td>
+                    <td>${row.finalVillage}</td>
                     <td>${row['वय']}</td>
                     <td>${expText}</td>
                     <td style="text-align:center">${bike}</td>
@@ -730,7 +724,7 @@
                 tbody.appendChild(tr);
             });
             
-            if(dataset.length === 0) tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">No candidates found.</td></tr>';
+            if(dataset.length === 0) tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding:20px;">No candidates found.</td></tr>';
         }
 
         function filterTableSearch() {
@@ -738,9 +732,9 @@
             const tr = document.getElementById('candidate-table').getElementsByTagName('tr');
             for (let i = 1; i < tr.length; i++) {
                 const tdName = tr[i].getElementsByTagName('td')[3];
-                const tdLoc = tr[i].getElementsByTagName('td')[5];
-                if (tdName || tdLoc) {
-                    if ((tdName.innerText || "").toUpperCase().indexOf(filter) > -1 || (tdLoc.innerText || "").toUpperCase().indexOf(filter) > -1) {
+                const tdVillage = tr[i].getElementsByTagName('td')[6]; 
+                if (tdName || tdVillage) {
+                    if ((tdName.innerText || "").toUpperCase().indexOf(filter) > -1 || (tdVillage.innerText || "").toUpperCase().indexOf(filter) > -1) {
                         tr[i].style.display = "";
                     } else {
                         tr[i].style.display = "none";
